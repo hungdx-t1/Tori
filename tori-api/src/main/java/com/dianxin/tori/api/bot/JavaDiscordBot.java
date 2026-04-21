@@ -1,6 +1,7 @@
 package com.dianxin.tori.api.bot;
 
 import com.dianxin.core.api.console.commands.ConsoleCommandManager;
+import com.dianxin.tori.api.controller.VersionController;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -107,6 +108,8 @@ public abstract class JavaDiscordBot {
         }
 
         started = true;
+
+        VersionController.checkJDACompatibilityOrThrow();
 
         JDABuilder jdaBuilder;
         EnumSet<GatewayIntent> intents = getIntents();

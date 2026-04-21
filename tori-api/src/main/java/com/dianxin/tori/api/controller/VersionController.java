@@ -12,6 +12,11 @@ import static com.dianxin.tori.api.base.Constants.JDA_REQUIRED_VERSION;
 public final class VersionController {
     private VersionController() { }
 
+    /**
+     * check compatible java version
+     *
+     * @throws UnsupportedOperationException if version is not meet requirement
+     */
     public static void checkCompatibilityOrThrow() {
         int javaVersion = VersionManager.getJavaVersionRunning();
 
@@ -35,21 +40,13 @@ public final class VersionController {
      *
      * @throws UnsupportedOperationException if version is not meet requirement
      */
-    public static void checkCompatibilityOrThrow2() {
-        int javaVersion = VersionManager.getJavaVersionRunning();
+    public static void checkJDACompatibilityOrThrow() {
         String jdaVersion = getJdaVersionImplemented();
-
-        if (javaVersion < JAVA_REQUIRED_VERSION) {
-            throw new UnsupportedOperationException(
-                    "Java version is incompatible, must use Java " + JAVA_REQUIRED_VERSION +
-                            "or higher instead " + javaVersion + "!"
-            );
-        }
 
         if (!isCompatibleVersion(jdaVersion)) {
             throw new UnsupportedOperationException(
                     "JDA version is incompatible, must use JDA " + JAVA_REQUIRED_VERSION +
-                            "or higher instead " + javaVersion + "!"
+                            "or higher instead " + jdaVersion + "!"
             );
         }
     }
