@@ -18,7 +18,9 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings({"removal", "unused", "FieldCanBeLocal", "ExtractMethodRecommender", "LoggingSimilarMessage"})
-// todo support annotated classes
 public class CommandRegistrar {
     private static final Logger logger = LoggerFactory.getLogger(CommandRegistrar.class);
     private final JDA jda;
@@ -68,8 +69,10 @@ public class CommandRegistrar {
         return this;
     }
 
+    @ApiStatus.AvailableSince("26.2.226")
     public CommandRegistrar registerSlash(BaseCommand... cmds) {
         // TODO
+        return this;
     }
 
     public CommandRegistrar registerUserContext(BaseUserContextMenu... contextMenu) {
@@ -166,6 +169,16 @@ public class CommandRegistrar {
             commandDataList.add(data);
         }
 
+        for (Map.Entry<String, IUserContextMenu> entry1 : userContextCmds.entrySet()) {
+            CommandData data = Commands.message(entry1.getKey());
+            commandDataList.add(data);
+        }
+
+        for (Map.Entry<String, IMessageContextMenu> entry2 : messageContextCmds.entrySet()) {
+            CommandData data = Commands.message(entry2.getKey());
+            commandDataList.add(data);
+        }
+
         updateAction.addCommands(commandDataList).queue(
                 commands -> System.out.println("✅ Đã cập nhật thành công " + commandDataList.size() + " lệnh lên Discord!"),
                 error -> System.err.println("❌ Lỗi cập nhật lệnh: " + error.getMessage())
@@ -182,27 +195,30 @@ public class CommandRegistrar {
 
         LegacyBaseCommand command = slashCmds.get(commandName);
         if (command == null) {
-            event.reply("❌ Lệnh này không tồn tại hoặc chưa được nạp vào hệ thống.").setEphemeral(true).queue();
+            event.reply("❌ This command is not exist or is not loaded on machine.").setEphemeral(true).queue();
             return;
         }
 
-        // Thực thi lệnh (BaseCommand.handle sẽ tự động check quyền, defer reply các kiểu)
-        command.handle(event);
+        command.handle(event); // execute command
     }
 
     public void onUserContextEvent(UserContextInteractionEvent event) {
-        BaseUserContextMenu menu = slashCmds.get(event.getName());
-        if (menu == null) return;
-
-        try {
-            if (!menu.beforeExecute(event)) return;
-            menu.execute(event);
-            menu.afterExecute(event);
-        } catch (Exception e) {
-            logger.error("❌ Lỗi context menu {}", event.getName(), e);
-            event.reply("❌ Có lỗi xảy ra.").setEphemeral(true).queue();
+        IUserContextMenu menu = userContextCmds.get(event.getName());
+        if (menu == null) {
+            event.reply("❌ This command is not exist or is not loaded on machine.").setEphemeral(true).queue();
+            return;
         }
+
+        menu.execute(event);
     }
 
-    public void onMessageContextEvent(MessageContextInteractionEvent event) {}
+    public void onMessageContextEvent(MessageContextInteractionEvent event) {
+        IMessageContextMenu menu = messageContextCmds.get(event.getName());
+        if (menu == null) {
+            event.reply("❌ This command is not exist or is not loaded on machine.").setEphemeral(true).queue();
+            return;
+        }
+
+        menu.execute(event);
+    }
 }
