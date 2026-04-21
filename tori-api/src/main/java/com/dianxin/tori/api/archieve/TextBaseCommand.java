@@ -1,4 +1,4 @@
-package com.dianxin.tori.api.commands.legacy;
+package com.dianxin.tori.api.archieve;
 
 import com.dianxin.core.jda.meta.BotMeta;
 import com.dianxin.core.jda.utils.services.ToriServices;

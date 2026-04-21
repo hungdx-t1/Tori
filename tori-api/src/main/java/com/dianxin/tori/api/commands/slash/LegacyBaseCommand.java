@@ -21,8 +21,6 @@ import java.util.List;
  * thực thi nhanh nhất, tránh lỗi "Bot is thinking" quá 3 giây của Discord.
  *
  */
-@Deprecated(forRemoval = true)
-@ApiStatus.ScheduledForRemoval(inVersion = "2.2.5")
 @SuppressWarnings("unused")
 public abstract class LegacyBaseCommand {
     private final Logger logger;

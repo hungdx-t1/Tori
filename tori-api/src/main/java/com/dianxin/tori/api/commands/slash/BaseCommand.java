@@ -1,33 +1,28 @@
 package com.dianxin.tori.api.commands.slash;
 
-import com.dianxin.core.jda.annotations.commands.*;
-import com.dianxin.core.jda.annotations.lifecycle.RegisterToriService;
-import com.dianxin.core.jda.meta.BotMeta;
-import com.dianxin.core.jda.utils.services.ToriServices;
+import com.dianxin.tori.api.annotations.commands.*;
+import com.dianxin.tori.api.bot.IBotMeta;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Deprecated(forRemoval = true)
-@ApiStatus.ScheduledForRemoval(inVersion = "2.2.5")
 @SuppressWarnings("unused")
 public abstract class BaseCommand {
     private final Logger logger;
     private final JDA jda;
-    private final BotMeta botMeta;
+    private final IBotMeta botMeta;
 
     /**
      * Khởi tạo Base Command, sử dụng jda thủ công
      * @param jda JDA thủ công được truyền vào
      * @param meta Bot Meta thủ công được truyền vòa
      */
-    public BaseCommand(JDA jda, BotMeta meta) {
+    public BaseCommand(JDA jda, IBotMeta meta) {
         this.logger = LoggerFactory.getLogger(this.getClass());
         this.jda = jda;
         this.botMeta = meta;

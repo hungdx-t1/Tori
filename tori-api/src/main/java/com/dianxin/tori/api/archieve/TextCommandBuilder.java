@@ -1,4 +1,4 @@
-package com.dianxin.tori.api.commands.legacy;
+package com.dianxin.tori.api.archieve;
 
 import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.ApiStatus;
