@@ -5,15 +5,36 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 
+/**
+ * A utility class providing quick access to predefined sets of {@link GatewayIntent}s.
+ * This is useful for quickly configuring the JDA builder during bot startup.
+ */
 @SuppressWarnings("unused")
 public final class IntentContext {
     private IntentContext() { }
 
+    /**
+     * Retrieves an {@link EnumSet} containing every available {@link GatewayIntent}.
+     * <p>
+     * <b>Warning:</b> Using all intents requires enabling Privileged Gateway Intents
+     * (Presence, Server Members, and Message Content) in your Discord Developer Portal.
+     *
+     * @return An {@link EnumSet} of all intents.
+     */
     @NotNull
     public static EnumSet<GatewayIntent> getAllIntents() {
         return EnumSet.allOf(GatewayIntent.class);
     }
 
+    /**
+     * Retrieves a standard, commonly used set of default {@link GatewayIntent}s.
+     * <p>
+     * This set includes most standard intents along with necessary privileged intents
+     * like {@code GUILD_MEMBERS} and {@code MESSAGE_CONTENT}. Ensure these are enabled
+     * in your Discord Developer Portal.
+     *
+     * @return An {@link EnumSet} containing default intents.
+     */
     @NotNull
     public static EnumSet<GatewayIntent> getDefaultIntents() {
         return EnumSet.of(

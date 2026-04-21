@@ -8,14 +8,19 @@ import java.util.Arrays;
 import static com.dianxin.tori.api.base.Constants.JAVA_REQUIRED_VERSION;
 import static com.dianxin.tori.api.base.Constants.JDA_REQUIRED_VERSION;
 
+/**
+ * A utility controller responsible for verifying the runtime environment's compatibility.
+ * This includes validating both the running Java version and the implemented JDA
+ * (Java Discord API) version against the system's minimum requirements.
+ */
 @SuppressWarnings("unused")
 public final class VersionController {
     private VersionController() { }
 
     /**
-     * check compatible java version
+     * Checks if the currently running Java version meets the minimum required version.
      *
-     * @throws UnsupportedOperationException if version is not meet requirement
+     * @throws UnsupportedOperationException if the running Java version is lower than the required version.
      */
     public static void checkCompatibilityOrThrow() {
         int javaVersion = VersionManager.getJavaVersionRunning();
@@ -29,16 +34,18 @@ public final class VersionController {
     }
 
     /**
-     * get JDA version developer using (runtime)
+     * Retrieves the version of JDA (Java Discord API) currently implemented at runtime.
+     *
+     * @return A string representing the runtime JDA version.
      */
     public static String getJdaVersionImplemented() {
         return JDAInfo.VERSION;
     }
 
     /**
-     * check compatible JDA version
+     * Checks if the currently implemented JDA version meets the minimum required version.
      *
-     * @throws UnsupportedOperationException if version is not meet requirement
+     * @throws UnsupportedOperationException if the running JDA version is incompatible (lower than required).
      */
     public static void checkJDACompatibilityOrThrow() {
         String jdaVersion = getJdaVersionImplemented();
@@ -52,7 +59,11 @@ public final class VersionController {
     }
 
     /**
-     * implemented >= required ?
+     * Compares an implemented version string against the required JDA version
+     * defined in the system constants.
+     *
+     * @param implemented The version string currently implemented.
+     * @return {@code true} if the implemented version is greater than or equal to the required version, {@code false} otherwise.
      */
     static boolean isCompatibleVersion(String implemented) {
         int[] impl = parse(implemented);
@@ -65,7 +76,7 @@ public final class VersionController {
             if (a > b) return true;
             if (a < b) return false;
         }
-        return true; // bằng nhau
+        return true; // equal
     }
 
     private static int[] parse(String v) {
