@@ -14,5 +14,5 @@ public interface IBotMeta {
     @NotNull List<String> botContributors();
     @NotNull String mainClassPath();
 
-    // @Nullable String botWebsite();
+    // @Nullable String botWebsite(); coming soon
 }

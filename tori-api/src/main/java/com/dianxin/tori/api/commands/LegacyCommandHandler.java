@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Deprecated(forRemoval = true)
 @ApiStatus.ScheduledForRemoval(inVersion = "2.2.5")
-@SuppressWarnings("unused")
+@SuppressWarnings("all")
 public class LegacyCommandHandler {
     private final JDA jda;
 
