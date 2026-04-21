@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <TerminalConsole name="TerminalConsole">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss}] %highlight{%-5level} %cyan{[%logger{3}]} - %highlight{%msg}{FATAL=red bold, ERROR=red bold, WARN=yellow bold, INFO=normal, DEBUG=magenta bold}%n%style{%xEx}{red}"
+                    disableAnsi="false"/>
+        </TerminalConsole>
+
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss} %level] [%logger{3}]: %msg%n%xEx" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="TerminalConsole"/>
+            <AppenderRef ref="File"/>
+        </Root>
+
+        <Logger name="com.dianxin.core" level="debug" additivity="false">
+            <AppenderRef ref="TerminalConsole"/>
+            <AppenderRef ref="File"/>
+        </Logger>
+    </Loggers>
+</Configuration>

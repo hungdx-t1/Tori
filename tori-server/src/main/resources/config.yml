@@ -1,0 +1,50 @@
+# ==============================================================================
+# Tori Server / Multi-Bot Global Configuration
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Terminal Configuration
+# Controls the behavior and appearance of the server's console/terminal interface.
+# ------------------------------------------------------------------------------
+terminal:
+  # Enables ANSI escape sequences for the console.
+  # Set to 'true' to allow colored text and formatted log outputs, making 
+  # the console much easier to read.
+  use-ansi: true
+  
+  # Enables JLine integration.
+  # Set to 'true' to support advanced command-line features such as 
+  # auto-completion, command history (up/down arrows), and advanced line editing.
+  use-jline: true
+
+# ------------------------------------------------------------------------------
+# JDA (Java Discord API) Default Configuration
+# These are the default settings applied to every bot instance running 
+# within the Tori Server environment.
+# ------------------------------------------------------------------------------
+jda-default:
+  rest-action:
+    # Determines how the system handles RestAction API execution failures.
+    # 
+    # - false (Default): The system forces explicit error handling using 
+    #   queue(success, failure). This ensures no errors are silently swallowed.
+    # - true: The system acts as "fire-and-forget", falling back to queue(success) 
+    #   and ignoring potential API errors.
+    #
+    # API JAVADOC NOTE (Regarding Context Exceptions):
+    # If enabled to pass ContextException as a root-cause to all failure consumers, 
+    # this might cause a PERFORMANCE DECREASE due to the creation of exceptions 
+    # for EVERY execution.
+    # It is recommended to keep global error ignoring 'false' and pass a context 
+    # consumer as failure manually using `queue(success, ContextException.here(failure))` 
+    # in your codebase where stack-trace context is actually needed.
+    ignore-errors: false
+
+# ------------------------------------------------------------------------------
+# Internal Web Server Configuration
+# ------------------------------------------------------------------------------
+# Enables or disables the internal HTTP Socket server.
+# Set to 'true' to allow the bot to host local web pages (e.g., /changelogs, 
+# dashboards, or API endpoints). 
+# Note: This feature is currently marked as (beta).
+open-socket: false
