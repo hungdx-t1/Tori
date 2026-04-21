@@ -57,14 +57,12 @@
             <groupId>com.github.curseletcraft.DianxinCore</groupId>
             <artifactId>dianxin-api</artifactId>
             <version>2.2.3</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.curseletcraft.DianxinCore</groupId>
             <artifactId>dianxin-simple-logger-pack</artifactId>
             <version>2.2.3</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
