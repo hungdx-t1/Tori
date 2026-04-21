@@ -1,6 +1,7 @@
 package com.dianxin.tori.api.bot;
 
 import com.dianxin.core.api.console.commands.ConsoleCommandManager;
+import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.controller.VersionController;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -136,6 +138,10 @@ public abstract class JavaDiscordBot {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build()
                 .awaitReady();
+
+        if(ToriProvider.getConfig().isIgnoreErrorsOnRestAction()) {
+            RestAction.setPassContext(true);
+        }
 
         logger.info("Bot {} initialize successfully.", meta.botName());
         logger.info("Link invite bot: {}", jda.getInviteUrl());
