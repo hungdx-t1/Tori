@@ -1,7 +1,6 @@
 package com.dianxin.tori.api.controller;
 
 import com.dianxin.core.api.utils.VersionManager;
-import com.dianxin.tori.api.base.Constants;
 import net.dv8tion.jda.api.JDAInfo;
 
 import java.util.Arrays;
@@ -25,16 +24,16 @@ public final class VersionController {
     }
 
     /**
-     * Lấy version JDA mà developer đang sử dụng (runtime)
+     * get JDA version developer using (runtime)
      */
     public static String getJdaVersionImplemented() {
         return JDAInfo.VERSION;
     }
 
     /**
-     * Kiểm tra JDA của developer có tương thích không
+     * check compatible JDA version
      *
-     * @throws UnsupportedOperationException nếu version thấp hơn yêu cầu
+     * @throws UnsupportedOperationException if version is not meet requirement
      */
     public static void checkCompatibilityOrThrow2() {
         int javaVersion = VersionManager.getJavaVersionRunning();
@@ -42,15 +41,15 @@ public final class VersionController {
 
         if (javaVersion < JAVA_REQUIRED_VERSION) {
             throw new UnsupportedOperationException(
-                    "Version Java không tương thích! Yêu cầu >= " + JAVA_REQUIRED_VERSION +
-                            ", nhưng đang dùng " + javaVersion
+                    "Java version is incompatible, must use Java " + JAVA_REQUIRED_VERSION +
+                            "or higher instead " + javaVersion + "!"
             );
         }
 
         if (!isCompatibleVersion(jdaVersion)) {
             throw new UnsupportedOperationException(
-                    "JDA version không tương thích! Yêu cầu >= " + JDA_REQUIRED_VERSION +
-                            ", nhưng đang dùng " + jdaVersion
+                    "JDA version is incompatible, must use JDA " + JAVA_REQUIRED_VERSION +
+                            "or higher instead " + javaVersion + "!"
             );
         }
     }
@@ -74,7 +73,7 @@ public final class VersionController {
 
     private static int[] parse(String v) {
         return Arrays.stream(v.split("\\."))
-                .map(s -> s.replaceAll("[^0-9]", "")) // đề phòng -alpha
+                .map(s -> s.replaceAll("[^0-9]", "")) // prevent -alpha
                 .mapToInt(Integer::parseInt)
                 .toArray();
     }

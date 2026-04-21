@@ -81,16 +81,11 @@ import org.jspecify.annotations.NullMarked;
  */
 @SuppressWarnings("unused")
 @NullMarked
-@Deprecated(forRemoval = true)
-@ApiStatus.ScheduledForRemoval(inVersion = "2.2.5")
 public final class VirtualEnvironmentBootstrap {
-
     static {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
     }
 
-    private VirtualEnvironmentBootstrap() {
-        throw new UnsupportedOperationException("Utility class");
-    }
+    private VirtualEnvironmentBootstrap() { }
 }
