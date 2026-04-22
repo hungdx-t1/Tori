@@ -7,6 +7,7 @@ import com.dianxin.tori.api.commands.messagecontext.IMessageContextMenu;
 import com.dianxin.tori.api.commands.messagecontext.ModernBaseMessageContextMenu;
 import com.dianxin.tori.api.commands.registry.MaincommandRegistry;
 import com.dianxin.tori.api.commands.slash.BaseCommand;
+import com.dianxin.tori.api.commands.slash.ISlashCommand;
 import com.dianxin.tori.api.commands.slash.ModernBaseCommand;
 import com.dianxin.tori.api.commands.usercontext.BaseUserContextMenu;
 import com.dianxin.tori.api.commands.usercontext.IUserContextMenu;
@@ -20,7 +21,6 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class CommandRegistrar {
 
     private CommandReplyConfig replyConfig = new DefaultEnglishReplyConfig();
 
-    private final Map<String, BaseCommand> slashCmds = new HashMap<>();
+    private final Map<String, ISlashCommand> slashCmds = new HashMap<>();
     private final Map<String, IUserContextMenu> userContextCmds = new HashMap<>();
     private final Map<String, IMessageContextMenu> messageContextCmds = new HashMap<>();
 
@@ -97,11 +97,28 @@ public class CommandRegistrar {
         return this;
     }
 
-    @ApiStatus.AvailableSince("26.2.226")
+    /**
+     * Registers one or more modern slash commands into the system.
+     *
+     * @param cmds An array of {@link ModernBaseCommand} instances to register.
+     * @return This {@link CommandRegistrar} instance for method chaining.
+     * @throws IllegalStateException    If commands have already been committed to Discord.
+     * @throws IllegalArgumentException If a command does not implement {@link MaincommandRegistry}.
+     */
     public CommandRegistrar registerSlash(ModernBaseCommand... cmds) {
-        // TODO
-        throw new UnsupportedOperationException("Will support soon!");
-        // return this;
+        if (commitedAll.get()) {
+            throw new IllegalStateException("Cannot register more command after you've commited all!");
+        }
+
+        for (ModernBaseCommand cmd : cmds) {
+            if (cmd instanceof MaincommandRegistry registry) {
+                String commandName = registry.getCommand().getName();
+                slashCmds.put(commandName, cmd);
+            } else {
+                throw new IllegalArgumentException("Command " + cmd.getClass().getSimpleName() + " must implements MaincommandRegistry!");
+            }
+        }
+        return this;
     }
 
     /**
@@ -230,7 +247,7 @@ public class CommandRegistrar {
         CommandListUpdateAction updateAction = guild == null ? jda.updateCommands() : guild.updateCommands();
         List<CommandData> commandDataList = new ArrayList<>();
 
-        for (BaseCommand cmd : slashCmds.values()) {
+        for (ISlashCommand cmd : slashCmds.values()) {
             CommandData data = ((MaincommandRegistry) cmd).getCommand();
             commandDataList.add(data);
         }
@@ -261,7 +278,7 @@ public class CommandRegistrar {
     public void onSlashCommandEvent(SlashCommandInteractionEvent event) {
         String commandName = event.getName();
 
-        BaseCommand command = slashCmds.get(commandName);
+        ISlashCommand command = slashCmds.get(commandName);
         if (command == null) {
             event.reply("❌ This command is not exist or is not loaded on machine.").setEphemeral(true).queue();
             return;
