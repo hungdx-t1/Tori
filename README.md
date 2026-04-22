@@ -73,7 +73,7 @@ In your bot's `pom.xml`, include `tori-api` with the `provided` scope:
     <dependency>
         <groupId>com.dianxin.tori</groupId>
         <artifactId>tori-api</artifactId>
-        <version>26.4.224</version>
+        <version>26.4.226</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
