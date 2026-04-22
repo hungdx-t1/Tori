@@ -8,8 +8,7 @@ import com.dianxin.tori.api.ToriServer;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.server.bot.BotLoader;
-import com.dianxin.tori.server.commands.console.BotsConsoleCommand;
-import com.dianxin.tori.server.commands.console.StopConsoleCommand;
+import com.dianxin.tori.server.commands.console.*;
 import com.dianxin.tori.server.config.MainServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +89,12 @@ public class Server implements ToriServer {
 
     private void initConsoleCommandManager() {
         this.consoleCommandManager = new ConsoleCommandManager();
+
+        this.consoleCommandManager.register(new HelpConsoleCommand());
+        this.consoleCommandManager.register(new ServerInfoConsoleCommand());
         this.consoleCommandManager.register(new StopConsoleCommand());
         this.consoleCommandManager.register(new BotsConsoleCommand());
+        this.consoleCommandManager.register(new PingConsoleCommand());
 
         this.consoleCommandManager.startListening();
     }
