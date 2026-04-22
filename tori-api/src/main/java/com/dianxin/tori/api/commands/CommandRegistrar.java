@@ -297,6 +297,6 @@ public class CommandRegistrar {
             return;
         }
 
-        menu.execute(event, replyConfig);
+        menu.handle(event, replyConfig);
     }
 }

@@ -15,9 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * An abstract base class for legacy-style User Context Menus.
- * This class relies on constructor parameters to define its metadata (such as the title)
- * instead of class-level annotations.
+ * An abstract base class for statically configured User Context Menus.
+ * This class relies on constructor parameters or a builder to define its metadata
+ * and execution constraints (such as required permissions or channel restrictions)
+ * instead of class-level annotations, ensuring optimized performance.
  */
 @SuppressWarnings("unused")
 public abstract class BaseUserContextMenu implements IUserContextMenu {
@@ -35,12 +36,26 @@ public abstract class BaseUserContextMenu implements IUserContextMenu {
     private final List<Permission> selfPermissionsRequired; // nullable or empty
     private final List<Permission> permissionsRequired; // nullable or empty
     private final boolean isDebug; // default false
-
+    /**
+     * Constructs a statically configured BaseUserContextMenu with explicit parameters.
+     *
+     * @param jda                     The {@link JDA} instance running this command.
+     * @param meta                    The {@link IBotMeta} containing the bot's metadata.
+     * @param title                   The name or title of the context menu displayed in Discord.
+     * @param isDefer                 Whether the reply should be automatically deferred.
+     * @param guildOnly               Whether the command is restricted to guilds (servers).
+     * @param ownerOnly               Whether the command is restricted strictly to the bot owner.
+     * @param privateChannelOnly      Whether the command is restricted to private channels.
+     * @param directMessageOnly       Whether the command is restricted to direct messages.
+     * @param permissionsRequired     A list of permissions required by the user invoking the command.
+     * @param selfPermissionsRequired A list of permissions required by the bot itself.
+     * @param isDebug                 Whether to log debug information upon execution.
+     */
     public BaseUserContextMenu(JDA jda, IBotMeta meta, String title, boolean isDefer, boolean guildOnly, boolean ownerOnly,
-                       boolean privateChannelOnly, boolean directMessageOnly,
-                       List<Permission> permissionsRequired,
-                       List<Permission> selfPermissionsRequired,
-                       boolean isDebug) {
+                               boolean privateChannelOnly, boolean directMessageOnly,
+                               List<Permission> permissionsRequired,
+                               List<Permission> selfPermissionsRequired,
+                               boolean isDebug) {
         this.logger = LoggerFactory.getLogger(this.getClass());
         this.jda = jda;
         this.botMeta = meta;
@@ -56,6 +71,14 @@ public abstract class BaseUserContextMenu implements IUserContextMenu {
         this.isDebug = isDebug;
     }
 
+    /**
+     * Constructs a statically configured BaseUserContextMenu using a {@link LegacyCommandBuilder}.
+     *
+     * @param title   The name or title of the context menu displayed in Discord.
+     * @param jda     The {@link JDA} instance running this command.
+     * @param meta    The {@link IBotMeta} containing the bot's metadata.
+     * @param builder The configured {@link LegacyCommandBuilder} containing execution constraints.
+     */
     public BaseUserContextMenu(String title, JDA jda, IBotMeta meta, LegacyCommandBuilder builder) {
         this.title = title;
         this.jda = jda;
@@ -83,7 +106,7 @@ public abstract class BaseUserContextMenu implements IUserContextMenu {
     }
 
     /**
-     * Retrieves the title/name of the context menu.
+     * Retrieves the title of the context menu as shown in the Discord client.
      *
      * @return The title string.
      */
@@ -92,17 +115,20 @@ public abstract class BaseUserContextMenu implements IUserContextMenu {
     }
 
     /**
-     * @return The logger instance for the current command.
+     * Retrieves the logger instance for the current command.
+     *
+     * @return The {@link Logger} instance.
      */
     protected Logger getLogger() {
         return logger;
     }
 
     /**
-     * Executes the user context menu logic.
-     * This method must be overridden by subclasses to provide actual functionality.
+     * Handles the lifecycle and validation of the user context menu execution.
+     * Validates all statically defined conditions before delegating to {@link #execute(UserContextInteractionEvent)}.
      *
-     * @param event The {@link UserContextInteractionEvent} triggered by Discord.
+     * @param event       The {@link UserContextInteractionEvent} triggered by Discord.
+     * @param replyConfig The configuration used for custom error or rejection messages.
      */
     @Override
     public final void handle(UserContextInteractionEvent event, CommandReplyConfig replyConfig) {
@@ -220,5 +246,11 @@ public abstract class BaseUserContextMenu implements IUserContextMenu {
         );
     }
 
+    /**
+     * The core execution logic of the user context menu command.
+     * Developers must implement this method to define what the command actually does after passing all checks.
+     *
+     * @param event The valid {@link UserContextInteractionEvent} passed through all pre-execution checks.
+     */
     protected abstract void execute(UserContextInteractionEvent event);
 }

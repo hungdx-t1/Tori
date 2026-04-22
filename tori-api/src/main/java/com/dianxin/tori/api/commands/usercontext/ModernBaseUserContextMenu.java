@@ -1,5 +1,8 @@
 package com.dianxin.tori.api.commands.usercontext;
 
+import com.dianxin.tori.api.commands.CommandReplyConfig;
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+
 /**
  * An abstract base class for modern User Context Menus.
  * <p>
@@ -7,5 +10,7 @@ package com.dianxin.tori.api.commands.usercontext;
  * to provide the necessary metadata (like the interaction name) to the {@link com.dianxin.tori.api.commands.CommandRegistrar}.
  */
 public abstract class ModernBaseUserContextMenu implements IUserContextMenu {
-    // Execution logic is inherited from IUserContextMenu and defined by the implementing subclass.
+
+    @Override
+    public final void handle(UserContextInteractionEvent event, CommandReplyConfig replyConfig) {}
 }

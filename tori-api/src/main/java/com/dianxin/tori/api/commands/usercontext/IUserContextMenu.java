@@ -10,5 +10,11 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
  */
 public interface IUserContextMenu {
 
+    /**
+     * Handles the incoming user context menu interaction.
+     *
+     * @param event       The {@link UserContextInteractionEvent} triggered by Discord.
+     * @param replyConfig The configuration used for custom error or rejection messages.
+     */
     void handle(UserContextInteractionEvent event, CommandReplyConfig replyConfig);
 }
