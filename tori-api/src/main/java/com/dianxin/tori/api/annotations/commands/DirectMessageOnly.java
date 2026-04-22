@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Restricts the execution of the annotated command to Direct Messages (DMs) only.
- * If a user attempts to execute this command within a Guild (Server), it should be blocked or ignored.
+ * If a user attempts to handle this command within a Guild (Server), it should be blocked or ignored.
  */
 @SuppressWarnings("unused")
 @Retention(RetentionPolicy.RUNTIME)

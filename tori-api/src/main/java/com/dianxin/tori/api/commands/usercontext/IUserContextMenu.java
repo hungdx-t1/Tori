@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.commands.usercontext;
 
+import com.dianxin.tori.api.commands.CommandReplyConfig;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 
 /**
@@ -9,11 +10,5 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
  */
 public interface IUserContextMenu {
 
-    /**
-     * Executes the user context menu logic.
-     *
-     * @param event The {@link UserContextInteractionEvent} containing the interaction context,
-     * including the user who invoked the command and the target user.
-     */
-    void execute(UserContextInteractionEvent event);
+    void handle(UserContextInteractionEvent event, CommandReplyConfig replyConfig);
 }

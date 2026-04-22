@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies the Discord {@link Permission}s that the bot itself must possess
- * in the current channel or guild to successfully execute the annotated command.
+ * in the current channel or guild to successfully handle the annotated command.
  */
 @SuppressWarnings("unused")
 @Retention(RetentionPolicy.RUNTIME)

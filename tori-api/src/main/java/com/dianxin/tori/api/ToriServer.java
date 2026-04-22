@@ -23,7 +23,7 @@ public interface ToriServer {
     /**
      * Gets the console command manager.
      * <p>
-     * This manager is used to register, unregister, and execute commands
+     * This manager is used to register, unregister, and handle commands
      * typed directly into the server's terminal/console.
      *
      * @return The {@link ConsoleCommandManager} instance.

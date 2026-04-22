@@ -38,7 +38,7 @@ public interface CommandReplyConfig {
 
     /**
      * @param permission The specific permission the bot is missing.
-     * @return The message sent when the bot lacks the required permission to execute the command.
+     * @return The message sent when the bot lacks the required permission to handle the command.
      */
     String getMissingBotPermissionMessage(Permission permission);
 

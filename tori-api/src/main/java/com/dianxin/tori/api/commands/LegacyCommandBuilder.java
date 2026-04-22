@@ -99,7 +99,7 @@ public class LegacyCommandBuilder {
     }
 
     /**
-     * Adds one or more Discord permissions that the bot itself must possess to execute the command.
+     * Adds one or more Discord permissions that the bot itself must possess to handle the command.
      *
      * @param permissions The {@link Permission}(s) required by the bot.
      * @return This builder instance for method chaining.

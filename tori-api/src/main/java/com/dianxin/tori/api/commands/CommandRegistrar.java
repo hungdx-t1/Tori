@@ -267,7 +267,7 @@ public class CommandRegistrar {
             return;
         }
 
-        command.handle(event, replyConfig); // execute command
+        command.handle(event, replyConfig); // handle command
     }
 
     /**
@@ -282,7 +282,7 @@ public class CommandRegistrar {
             return;
         }
 
-        menu.execute(event);
+        menu.handle(event, replyConfig);
     }
 
     /**
@@ -297,6 +297,6 @@ public class CommandRegistrar {
             return;
         }
 
-        menu.execute(event);
+        menu.execute(event, replyConfig);
     }
 }

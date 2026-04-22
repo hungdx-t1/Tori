@@ -70,7 +70,7 @@ public abstract class ModernBaseCommand implements ISlashCommand {
         try {
             execute(event);
         } catch (Exception e) {
-            logger.error("❌ An error occured when trying to execute command `{}`!", event.getName(), e);
+            logger.error("❌ An error occured when trying to handle command `{}`!", event.getName(), e);
         }
 
         logDebug(event);
@@ -124,7 +124,7 @@ public abstract class ModernBaseCommand implements ISlashCommand {
 
         Member member = event.getMember();
         if (member == null) {
-            event.reply("⚠️ Cannot execute command when member not found.").setEphemeral(true).queue();
+            event.reply("⚠️ Cannot handle command when member not found.").setEphemeral(true).queue();
             return false;
         }
 
