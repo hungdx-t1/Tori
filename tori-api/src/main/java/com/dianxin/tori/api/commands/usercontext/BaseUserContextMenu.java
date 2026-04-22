@@ -1,10 +1,13 @@
 package com.dianxin.tori.api.commands.usercontext;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * An abstract base class for legacy-style User Context Menus.
@@ -12,10 +15,19 @@ import org.slf4j.LoggerFactory;
  * instead of class-level annotations.
  */
 public abstract class BaseUserContextMenu implements IUserContextMenu {
-    protected final Logger logger;
-
+    private final Logger logger;
     private final String title;
     private final JDA jda;
+
+    // Command config
+    private final boolean isDefer; // default false
+    private final boolean guildOnly; // default false
+    private final boolean ownerOnly; // default false
+    private final boolean privateChannelOnly; // default false
+    private final boolean directMessageOnly; // (DM = direct message), default false
+    private final List<Permission> selfPermissionsRequired; // nullable or empty
+    private final List<Permission> permissionsRequired; // nullable or empty
+    private final boolean isDebug; // default false
 
     /**
      * Constructs a new BaseUserContextMenu.
