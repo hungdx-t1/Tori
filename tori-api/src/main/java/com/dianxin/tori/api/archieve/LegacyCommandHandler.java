@@ -2,7 +2,7 @@ package com.dianxin.tori.api.archieve;
 
 import com.dianxin.tori.api.commands.CommandRegistrar;
 import com.dianxin.tori.api.commands.registry.MaincommandRegistry;
-import com.dianxin.tori.api.commands.slash.LegacyBaseCommand;
+import com.dianxin.tori.api.commands.slash.BaseCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,7 +28,7 @@ public class LegacyCommandHandler {
 
     // Lưu trữ các lệnh đã đăng ký.
     // Key là tên lệnh (vd: "play", "ban"), Value là class thực thi lệnh đó.
-    private final Map<String, LegacyBaseCommand> commands = new HashMap<>();
+    private final Map<String, BaseCommand> commands = new HashMap<>();
 
     private final AtomicBoolean commitedAll = new AtomicBoolean(false);
 
@@ -39,12 +39,12 @@ public class LegacyCommandHandler {
     /**
      * Đăng ký một hoặc nhiều lệnh vào bộ nhớ của bot.
      */
-    public LegacyCommandHandler registerCommands(LegacyBaseCommand... cmdInstances) {
+    public LegacyCommandHandler registerCommands(BaseCommand... cmdInstances) {
         if (commitedAll.get()) {
             throw new IllegalStateException("Không thể đăng ký thêm lệnh sau khi đã commit!");
         }
 
-        for (LegacyBaseCommand cmd : cmdInstances) {
+        for (BaseCommand cmd : cmdInstances) {
             if (cmd instanceof MaincommandRegistry registry) {
                 String commandName = registry.getCommand().getName(); // Tự động lấy tên lệnh từ CommandData để làm Key
                 commands.put(commandName, cmd);
@@ -64,7 +64,7 @@ public class LegacyCommandHandler {
         CommandListUpdateAction updateAction = guild == null ? jda.updateCommands() : guild.updateCommands();
         List<CommandData> commandDataList = new ArrayList<>();
 
-        for (LegacyBaseCommand cmd : commands.values()) {
+        for (BaseCommand cmd : commands.values()) {
             CommandData data = ((MaincommandRegistry) cmd).getCommand();
             commandDataList.add(data);
         }
@@ -81,13 +81,13 @@ public class LegacyCommandHandler {
     public void onEvent(SlashCommandInteractionEvent event) {
         String commandName = event.getName();
 
-        LegacyBaseCommand command = commands.get(commandName);
+        BaseCommand command = commands.get(commandName);
         if (command == null) {
             event.reply("❌ Lệnh này không tồn tại hoặc chưa được nạp vào hệ thống.").setEphemeral(true).queue();
             return;
         }
 
-        // Thực thi lệnh (BaseCommand.handle sẽ tự động check quyền, defer reply các kiểu)
+        // Thực thi lệnh (ModernBaseCommand.handle sẽ tự động check quyền, defer reply các kiểu)
         // command.handle(event);
     }
 }

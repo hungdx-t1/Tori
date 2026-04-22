@@ -7,7 +7,7 @@ import com.dianxin.tori.api.commands.messagecontext.IMessageContextMenu;
 import com.dianxin.tori.api.commands.messagecontext.ModernBaseMessageContextMenu;
 import com.dianxin.tori.api.commands.registry.MaincommandRegistry;
 import com.dianxin.tori.api.commands.slash.BaseCommand;
-import com.dianxin.tori.api.commands.slash.LegacyBaseCommand;
+import com.dianxin.tori.api.commands.slash.ModernBaseCommand;
 import com.dianxin.tori.api.commands.usercontext.BaseUserContextMenu;
 import com.dianxin.tori.api.commands.usercontext.IUserContextMenu;
 import com.dianxin.tori.api.commands.usercontext.ModernBaseUserContextMenu;
@@ -47,7 +47,7 @@ public class CommandRegistrar {
 
     private CommandReplyConfig replyConfig = new DefaultEnglishReplyConfig();
 
-    private final Map<String, LegacyBaseCommand> slashCmds = new HashMap<>();
+    private final Map<String, BaseCommand> slashCmds = new HashMap<>();
     private final Map<String, IUserContextMenu> userContextCmds = new HashMap<>();
     private final Map<String, IMessageContextMenu> messageContextCmds = new HashMap<>();
 
@@ -76,17 +76,17 @@ public class CommandRegistrar {
     /**
      * Registers one or more legacy slash commands into the system.
      *
-     * @param cmdInstances An array of {@link LegacyBaseCommand} instances to register.
+     * @param cmdInstances An array of {@link BaseCommand} instances to register.
      * @return This {@link CommandRegistrar} instance for method chaining.
      * @throws IllegalStateException    If commands have already been committed to Discord.
      * @throws IllegalArgumentException If a command does not implement {@link MaincommandRegistry}.
      */
-    public CommandRegistrar registerSlash(LegacyBaseCommand... cmdInstances) {
+    public CommandRegistrar registerSlash(BaseCommand... cmdInstances) {
         if (commitedAll.get()) {
             throw new IllegalStateException("Cannot register more command after you've commited all!");
         }
 
-        for (LegacyBaseCommand cmd : cmdInstances) {
+        for (BaseCommand cmd : cmdInstances) {
             if (cmd instanceof MaincommandRegistry registry) {
                 String commandName = registry.getCommand().getName();
                 slashCmds.put(commandName, cmd);
@@ -98,7 +98,7 @@ public class CommandRegistrar {
     }
 
     @ApiStatus.AvailableSince("26.2.226")
-    public CommandRegistrar registerSlash(BaseCommand... cmds) {
+    public CommandRegistrar registerSlash(ModernBaseCommand... cmds) {
         // TODO
         throw new UnsupportedOperationException("Will support soon!");
         // return this;
@@ -230,7 +230,7 @@ public class CommandRegistrar {
         CommandListUpdateAction updateAction = guild == null ? jda.updateCommands() : guild.updateCommands();
         List<CommandData> commandDataList = new ArrayList<>();
 
-        for (LegacyBaseCommand cmd : slashCmds.values()) {
+        for (BaseCommand cmd : slashCmds.values()) {
             CommandData data = ((MaincommandRegistry) cmd).getCommand();
             commandDataList.add(data);
         }
@@ -261,7 +261,7 @@ public class CommandRegistrar {
     public void onSlashCommandEvent(SlashCommandInteractionEvent event) {
         String commandName = event.getName();
 
-        LegacyBaseCommand command = slashCmds.get(commandName);
+        BaseCommand command = slashCmds.get(commandName);
         if (command == null) {
             event.reply("❌ This command is not exist or is not loaded on machine.").setEphemeral(true).queue();
             return;

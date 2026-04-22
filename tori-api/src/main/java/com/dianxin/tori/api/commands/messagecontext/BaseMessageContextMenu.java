@@ -12,7 +12,7 @@ public abstract class BaseMessageContextMenu implements IMessageContextMenu {
     private final String title;
     private final JDA jda;
 
-    public BaseMessageContextMenu(String title, Command.Type type, JDA jda) {
+    public BaseMessageContextMenu(String title, JDA jda) {
         this.title = title;
         this.jda = jda;
         this.logger = LoggerFactory.getLogger(getClass());

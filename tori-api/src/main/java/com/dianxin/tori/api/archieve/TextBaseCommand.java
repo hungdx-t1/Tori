@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * BaseCommand dành cho Text Command (Lệnh truyền thống qua tin nhắn).
+ * ModernBaseCommand dành cho Text Command (Lệnh truyền thống qua tin nhắn).
  * Discord không còn ưu tiên dạng lệnh này do giới hạn của Message Content Intent.
  */
 @Deprecated(forRemoval = true)
