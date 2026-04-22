@@ -1,6 +1,7 @@
 package com.dianxin.tori.server;
 
 import com.dianxin.tori.api.ToriProvider;
+import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown, "Tori-Shutdown-Thread"));
         log.info("Tori Server has been started in {} ms!", System.currentTimeMillis() - BOOT_TIME.toEpochMilli());
         log.info("Ready!");
+        log.info("Using Tori server v{}", Constants.TORI_SERVER_VERSION);
     }
 
     public static Server getServer() {
