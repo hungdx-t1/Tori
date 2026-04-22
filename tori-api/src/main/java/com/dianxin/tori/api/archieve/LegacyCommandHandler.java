@@ -88,6 +88,6 @@ public class LegacyCommandHandler {
         }
 
         // Thực thi lệnh (BaseCommand.handle sẽ tự động check quyền, defer reply các kiểu)
-        command.handle(event);
+        // command.handle(event);
     }
 }

@@ -1,7 +1,6 @@
 package com.dianxin.tori.api.archieve;
 
-import com.dianxin.core.jda.meta.BotMeta;
-import com.dianxin.core.jda.utils.services.ToriServices;
+import com.dianxin.tori.api.bot.IBotMeta;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -21,11 +20,11 @@ import java.util.List;
 @Deprecated(forRemoval = true)
 @ApiStatus.ScheduledForRemoval(inVersion = "2.2.5")
 @ApiStatus.Obsolete(since = "Discord Message Content Intent restrictions")
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "removal"})
 public abstract class TextBaseCommand {
     private final Logger logger;
     private final JDA jda;
-    private final BotMeta botMeta;
+    private final IBotMeta botMeta;
 
     // Cấu hình lệnh
     private final String name;
@@ -36,7 +35,7 @@ public abstract class TextBaseCommand {
     private final List<Permission> permissionsRequired;
     private final List<Permission> selfPermissionsRequired;
 
-    public TextBaseCommand(JDA jda, BotMeta meta, TextCommandBuilder builder) {
+    public TextBaseCommand(JDA jda, IBotMeta meta, TextCommandBuilder builder) {
         this.logger = LoggerFactory.getLogger(this.getClass());
         this.jda = jda;
         this.botMeta = meta;
@@ -83,7 +82,7 @@ public abstract class TextBaseCommand {
     private boolean checkOwnerOnly(MessageReceivedEvent event) {
         if (!this.ownerOnly) return true;
 
-        if (!event.getAuthor().getId().equals(botMeta.getBotOwnerId())) {
+        if (!event.getAuthor().getId().equals(botMeta.botOwnerId())) {
             event.getMessage().reply("❌ Chỉ owner mới được dùng lệnh này.").queue();
             return false;
         }

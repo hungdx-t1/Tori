@@ -2,6 +2,7 @@ package com.dianxin.tori.api.commands.slash;
 
 import com.dianxin.tori.api.annotations.commands.*;
 import com.dianxin.tori.api.bot.IBotMeta;
+import com.dianxin.tori.api.commands.CommandReplyConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -11,16 +12,22 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The modern, annotation-driven base class for all slash commands.
+ * Developers can use annotations like {@code @GuildOnly} or {@code @RequirePermissions}
+ * on subclasses to dynamically enforce execution rules.
+ */
 @SuppressWarnings("unused")
-public abstract class BaseCommand {
+public abstract class BaseCommand implements ISlashCommand {
     private final Logger logger;
     private final JDA jda;
     private final IBotMeta botMeta;
 
     /**
-     * Khởi tạo Base Command, sử dụng jda thủ công
-     * @param jda JDA thủ công được truyền vào
-     * @param meta Bot Meta thủ công được truyền vòa
+     * Constructs a new BaseCommand.
+     *
+     * @param jda  The {@link JDA} instance running this command.
+     * @param meta The {@link IBotMeta} containing the bot's metadata.
      */
     public BaseCommand(JDA jda, IBotMeta meta) {
         this.logger = LoggerFactory.getLogger(this.getClass());
@@ -29,37 +36,41 @@ public abstract class BaseCommand {
     }
 
     /**
-     * @return Logger của command hiện tại
+     * @return The logger instance for the current command.
      */
     protected Logger getLogger() {
         return logger;
     }
 
     /**
-     * @return Java discord bot chính
+     * @return The JDA instance associated with this command.
      */
     protected JDA getJda() {
         return jda;
     }
 
     /**
-     * Phương thức vận hành command
-     * @param event SlashCommandInteractionEvent được truyền
+     * Handles the lifecycle and validation of the command execution.
+     * Parses the command's class annotations to enforce restrictions before
+     * delegating to {@link #execute(SlashCommandInteractionEvent)}.
+     *
+     * @param event       The {@link SlashCommandInteractionEvent} triggered by Discord.
+     * @param replyConfig The configuration used for custom error/rejection messages.
      */
-    public final void handle(SlashCommandInteractionEvent event) {
-        if (!checkOwnerOnly(event)) return;
-        if (!checkDMOnly(event)) return;
-        if (!checkPrivateChannelOnly(event)) return;
-        if (!checkGuildOnly(event)) return;
-        if (!checkUserPermissions(event)) return;
-        if (!checkBotPermissions(event)) return;
+    public final void handle(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
+        if (!checkOwnerOnly(event, replyConfig)) return;
+        if (!checkDMOnly(event, replyConfig)) return;
+        if (!checkPrivateChannelOnly(event, replyConfig)) return;
+        if (!checkGuildOnly(event, replyConfig)) return;
+        if (!checkUserPermissions(event, replyConfig)) return;
+        if (!checkBotPermissions(event, replyConfig)) return;
 
         applyDeferIfNeeded(event);
 
         try {
             execute(event);
         } catch (Exception e) {
-            logger.error("❌ Lỗi khi thực thi command {}", event.getName(), e);
+            logger.error("❌ An error occured when trying to execute command `{}`!", event.getName(), e);
         }
 
         logDebug(event);
@@ -68,65 +79,65 @@ public abstract class BaseCommand {
     // =========================================
     // begin of checker
 
-    private boolean checkOwnerOnly(SlashCommandInteractionEvent event) {
+    private boolean checkOwnerOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!getClass().isAnnotationPresent(OwnerOnly.class)) return true;
 
         if(!event.getUser().getId().equals(botMeta.botOwnerId())) {
-            event.reply("❌ Chỉ owner mới được dùng lệnh này.").setEphemeral(true).queue();
+            event.reply(replyConfig.getOwnerOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
 
         return true;
     }
 
-    private boolean checkDMOnly(SlashCommandInteractionEvent event) {
+    private boolean checkDMOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if(!getClass().isAnnotationPresent(DirectMessageOnly.class)) return true;
 
         if(event.getGuild() != null) {
-            event.reply("❌ Lệnh này chỉ được dùng khi DMs (nhắn riêng).").setEphemeral(true).queue();
+            event.reply(replyConfig.getDmOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
 
         return true;
     }
 
-    private boolean checkPrivateChannelOnly(SlashCommandInteractionEvent event) {
+    private boolean checkPrivateChannelOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if(!getClass().isAnnotationPresent(PrivateChannelOnly.class)) return true;
         if (event.getChannelType() == ChannelType.PRIVATE) return true;
-        event.reply("❌ Lệnh này chỉ được dùng trong DMs/Private Channel.").setEphemeral(true).queue();
+        event.reply(replyConfig.getPrivateChannelOnlyMessage()).setEphemeral(true).queue();
         return false;
     }
 
-    private boolean checkGuildOnly(SlashCommandInteractionEvent event) {
+    private boolean checkGuildOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!getClass().isAnnotationPresent(GuildOnly.class)) return true;
 
         if (event.getGuild() == null) {
-            event.reply("❌ Lệnh này chỉ dùng trong server.").setEphemeral(true).queue();
+            event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
         return true;
     }
 
-    private boolean checkUserPermissions(SlashCommandInteractionEvent event) {
+    private boolean checkUserPermissions(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         RequirePermissions ann = getClass().getAnnotation(RequirePermissions.class);
         if (ann == null) return true;
 
         Member member = event.getMember();
         if (member == null) {
-            event.reply("⚠️ Không xác định được người dùng.").setEphemeral(true).queue();
+            event.reply("⚠️ Cannot execute command when member not found.").setEphemeral(true).queue();
             return false;
         }
 
         for (Permission p : ann.value()) {
             if (!member.hasPermission(p)) {
-                event.reply("❌ Bạn thiếu quyền `" + p.getName() + "`.").setEphemeral(true).queue();
+                event.reply(replyConfig.getMissingUserPermissionMessage(p)).setEphemeral(true).queue();
                 return false;
             }
         }
         return true;
     }
 
-    private boolean checkBotPermissions(SlashCommandInteractionEvent event) {
+    private boolean checkBotPermissions(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         RequireSelfPermissions ann = getClass().getAnnotation(RequireSelfPermissions.class);
         if (ann == null) return true;
 
@@ -137,7 +148,7 @@ public abstract class BaseCommand {
 
         for (Permission p : ann.value()) {
             if (!self.hasPermission(p)) {
-                event.reply("❌ Bot thiếu quyền `" + p.getName() + "`.").setEphemeral(true).queue();
+                event.reply(replyConfig.getMissingBotPermissionMessage(p)).setEphemeral(true).queue();
                 return false;
             }
         }
@@ -160,6 +171,11 @@ public abstract class BaseCommand {
         );
     }
 
-    // abstract func
+    /**
+     * The core execution logic of the command.
+     * Developers must implement this method to define what the command actually does.
+     *
+     * @param event The valid {@link SlashCommandInteractionEvent} passed through all pre-checks.
+     */
     protected abstract void execute(SlashCommandInteractionEvent event);
 }

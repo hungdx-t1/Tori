@@ -1,6 +1,7 @@
 package com.dianxin.tori.api.commands.slash;
 
 import com.dianxin.tori.api.bot.IBotMeta;
+import com.dianxin.tori.api.commands.CommandReplyConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -15,29 +16,39 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * BaseCommand phiên bản tối ưu hóa hiệu suất tĩnh.
- * Loại bỏ hoàn toàn quá trình quét Annotation (Reflection) để đảm bảo tốc độ
- * thực thi nhanh nhất, tránh lỗi "Bot is thinking" quá 3 giây của Discord.
- *
+ * A statically optimized version of BaseCommand.
+ * Completely removes the Annotation scanning (Reflection) process to ensure maximum
+ * execution speed, helping to prevent Discord's 3-second "Bot is thinking" timeout error.
  */
 @SuppressWarnings("unused")
-public abstract class LegacyBaseCommand {
+public abstract class LegacyBaseCommand implements ISlashCommand {
     private final Logger logger;
     private final JDA jda;
     private final IBotMeta botMeta;
 
-    // Cấu hình lệnh
-    private final boolean isDefer; // mặc định false
-    private final boolean guildOnly; // mặc định false
-    private final boolean ownerOnly; // mặc định false
-    private final boolean privateChannelOnly; // mặc định false
-    private final boolean directMessageOnly; // (DM = direct message), mặc định false
-    private final List<Permission> selfPermissionsRequired; // nullable
-    private final List<Permission> permissionsRequired; // nullable
-    private final boolean isDebug; // mặc định false
+    // Command config
+    private final boolean isDefer; // default false
+    private final boolean guildOnly; // default false
+    private final boolean ownerOnly; // default false
+    private final boolean privateChannelOnly; // default false
+    private final boolean directMessageOnly; // (DM = direct message), default false
+    private final List<Permission> selfPermissionsRequired; // nullable or empty
+    private final List<Permission> permissionsRequired; // nullable or empty
+    private final boolean isDebug; // default false
 
     /**
-     * Khởi tạo cấu hình lệnh với JDA và BotMeta thủ công
+     * Constructs a statically configured LegacyBaseCommand.
+     *
+     * @param jda                     The {@link JDA} instance running this command.
+     * @param meta                    The {@link IBotMeta} containing the bot's metadata.
+     * @param isDefer                 Whether the reply should be automatically deferred.
+     * @param guildOnly               Whether the command is restricted to guilds.
+     * @param ownerOnly               Whether the command is restricted to the bot owner.
+     * @param privateChannelOnly      Whether the command is restricted to private channels.
+     * @param directMessageOnly       Whether the command is restricted to direct messages.
+     * @param permissionsRequired     A list of permissions required by the user.
+     * @param selfPermissionsRequired A list of permissions required by the bot.
+     * @param isDebug                 Whether to log debug information when executed.
      */
     public LegacyBaseCommand(JDA jda, IBotMeta meta, boolean isDefer, boolean guildOnly, boolean ownerOnly,
                              boolean privateChannelOnly, boolean directMessageOnly,
@@ -59,14 +70,17 @@ public abstract class LegacyBaseCommand {
     }
 
     /**
-     * Khởi tạo cấu hình lệnh thông qua Builder với JDA và BotMeta thủ công
+     * Constructs a LegacyBaseCommand using the {@link LegacyCommandBuilder}.
+     *
+     * @param jda     The {@link JDA} instance running this command.
+     * @param meta    The {@link IBotMeta} containing the bot's metadata.
+     * @param builder The configured {@link LegacyCommandBuilder}.
      */
     public LegacyBaseCommand(JDA jda, IBotMeta meta, LegacyCommandBuilder builder) {
         this.logger = LoggerFactory.getLogger(this.getClass());
         this.jda = jda;
         this.botMeta = meta;
 
-        // Trích xuất cấu hình từ Builder
         this.isDefer = builder.isDefer();
         this.guildOnly = builder.isGuildOnly();
         this.ownerOnly = builder.isOwnerOnly();
@@ -78,37 +92,40 @@ public abstract class LegacyBaseCommand {
     }
 
     /**
-     * @return Logger của command hiện tại
+     * @return The logger instance for the current command.
      */
     protected Logger getLogger() {
         return logger;
     }
 
     /**
-     * @return Java discord bot chính
+     * @return The JDA instance associated with this command.
      */
     protected JDA getJda() {
         return jda;
     }
 
     /**
-     * Phương thức vận hành command
-     * @param event SlashCommandInteractionEvent được truyền
+     * Handles the lifecycle and validation of the command execution.
+     * Validates all statically defined conditions before delegating to {@link #execute(SlashCommandInteractionEvent)}.
+     *
+     * @param event       The {@link SlashCommandInteractionEvent} triggered by Discord.
+     * @param replyConfig The configuration used for custom error/rejection messages.
      */
-    public final void handle(SlashCommandInteractionEvent event) {
-        if (!checkOwnerOnly(event)) return;
-        if (!checkDMOnly(event)) return;
-        if (!checkPrivateChannelOnly(event)) return;
-        if (!checkGuildOnly(event)) return;
-        if (!checkUserPermissions(event)) return;
-        if (!checkBotPermissions(event)) return;
+    public final void handle(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
+        if (!checkOwnerOnly(event, replyConfig)) return;
+        if (!checkDMOnly(event, replyConfig)) return;
+        if (!checkPrivateChannelOnly(event, replyConfig)) return;
+        if (!checkGuildOnly(event, replyConfig)) return;
+        if (!checkUserPermissions(event, replyConfig)) return;
+        if (!checkBotPermissions(event, replyConfig)) return;
 
         applyDeferIfNeeded(event);
 
         try {
             execute(event);
         } catch (Exception e) {
-            logger.error("❌ Lỗi khi thực thi command {}", event.getName(), e);
+            logger.error("❌ An error occured when trying to execute command `{}`!", event.getName(), e);
         }
 
         logDebug(event);
@@ -118,66 +135,66 @@ public abstract class LegacyBaseCommand {
     // Begin of Checkers
     // =========================================
 
-    private boolean checkOwnerOnly(SlashCommandInteractionEvent event) {
+    private boolean checkOwnerOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!this.ownerOnly) return true;
 
         if (!event.getUser().getId().equals(botMeta.botOwnerId())) {
-            event.reply("❌ Chỉ owner mới được dùng lệnh này.").setEphemeral(true).queue();
+            event.reply(replyConfig.getOwnerOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
 
         return true;
     }
 
-    private boolean checkDMOnly(SlashCommandInteractionEvent event) {
+    private boolean checkDMOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!this.directMessageOnly) return true;
 
         if (event.getGuild() != null) {
-            event.reply("❌ Lệnh này chỉ được dùng khi DMs (nhắn riêng).").setEphemeral(true).queue();
+            event.reply(replyConfig.getDmOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
 
         return true;
     }
 
-    private boolean checkPrivateChannelOnly(SlashCommandInteractionEvent event) {
+    private boolean checkPrivateChannelOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!this.privateChannelOnly) return true;
 
         if (event.getChannelType() == ChannelType.PRIVATE) return true;
 
-        event.reply("❌ Lệnh này chỉ được dùng trong DMs/Private Channel.").setEphemeral(true).queue();
+        event.reply(replyConfig.getPrivateChannelOnlyMessage()).setEphemeral(true).queue();
         return false;
     }
 
-    private boolean checkGuildOnly(SlashCommandInteractionEvent event) {
+    private boolean checkGuildOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!this.guildOnly) return true;
 
         if (event.getGuild() == null) {
-            event.reply("❌ Lệnh này chỉ dùng trong server.").setEphemeral(true).queue();
+            event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
         return true;
     }
 
-    private boolean checkUserPermissions(SlashCommandInteractionEvent event) {
+    private boolean checkUserPermissions(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (this.permissionsRequired == null || this.permissionsRequired.isEmpty()) return true;
 
         Member member = event.getMember();
         if (member == null) {
-            event.reply("⚠️ Không xác định được người dùng.").setEphemeral(true).queue();
+            event.reply("⚠️ Cannot execute command when member not found.").setEphemeral(true).queue();
             return false;
         }
 
         for (Permission p : this.permissionsRequired) {
             if (!member.hasPermission(p)) {
-                event.reply("❌ Bạn thiếu quyền `" + p.getName() + "`.").setEphemeral(true).queue();
+                event.reply(replyConfig.getMissingUserPermissionMessage(p)).setEphemeral(true).queue();
                 return false;
             }
         }
         return true;
     }
 
-    private boolean checkBotPermissions(SlashCommandInteractionEvent event) {
+    private boolean checkBotPermissions(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (this.selfPermissionsRequired == null || this.selfPermissionsRequired.isEmpty()) return true;
 
         Guild guild = event.getGuild();
@@ -187,7 +204,7 @@ public abstract class LegacyBaseCommand {
 
         for (Permission p : this.selfPermissionsRequired) {
             if (!self.hasPermission(p)) {
-                event.reply("❌ Bot thiếu quyền `" + p.getName() + "`.").setEphemeral(true).queue();
+                event.reply(replyConfig.getMissingBotPermissionMessage(p)).setEphemeral(true).queue();
                 return false;
             }
         }
@@ -203,19 +220,24 @@ public abstract class LegacyBaseCommand {
     private void logDebug(SlashCommandInteractionEvent event) {
         if (!this.isDebug) return;
 
-        logger.debug("[CMD] {} by {} | {}",
+        logger.debug("[Command] {} by {} | {}",
                 event.getName(),
                 event.getUser().getAsTag(),
                 event.getCommandString()
         );
     }
 
-    // abstract func
+    /**
+     * The core execution logic of the command.
+     * Developers must implement this method to define what the command actually does.
+     *
+     * @param event The valid {@link SlashCommandInteractionEvent} passed through all pre-checks.
+     */
     protected abstract void execute(SlashCommandInteractionEvent event);
 
     /**
-     * Lớp hỗ trợ xây dựng cấu hình cho LegacyBaseCommand.
-     * Giúp code gọn gàng và dễ đọc hơn khi khởi tạo lệnh.
+     * A utility builder class designed to construct configurations for {@link LegacyBaseCommand}.
+     * This helps keep the code clean, readable, and manageable during command initialization.
      */
     public static class LegacyCommandBuilder {
         private boolean isDefer = false;
@@ -227,61 +249,150 @@ public abstract class LegacyBaseCommand {
         private final List<Permission> permissionsRequired = new ArrayList<>();
         private final List<Permission> selfPermissionsRequired = new ArrayList<>();
 
-        // Các hàm Setter mang phong cách Fluent Interface (Return this)
-
+        /**
+         * Sets whether the command reply should be automatically deferred.
+         * Deferring gives the bot up to 15 minutes to process the request before responding.
+         *
+         * @param defer {@code true} to automatically defer the reply, {@code false} otherwise.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setDefer(boolean defer) {
             this.isDefer = defer;
             return this;
         }
-
+        /**
+         * Restricts the command to be executable only within Discord guilds (servers).
+         *
+         * @param guildOnly {@code true} to restrict to guilds, {@code false} to allow elsewhere.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setGuildOnly(boolean guildOnly) {
             this.guildOnly = guildOnly;
             return this;
         }
 
+        /**
+         * Restricts the command exclusively to the bot owner.
+         *
+         * @param ownerOnly {@code true} to restrict to the bot owner, {@code false} otherwise.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setOwnerOnly(boolean ownerOnly) {
             this.ownerOnly = ownerOnly;
             return this;
         }
 
+        /**
+         * Restricts the command to be executable only in private channels.
+         *
+         * @param privateChannelOnly {@code true} to restrict to private channels, {@code false} otherwise.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setPrivateChannelOnly(boolean privateChannelOnly) {
             this.privateChannelOnly = privateChannelOnly;
             return this;
         }
 
+        /**
+         * Restricts the command to be executable only in Direct Messages (DMs).
+         *
+         * @param directMessageOnly {@code true} to restrict to DMs, {@code false} otherwise.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setDirectMessageOnly(boolean directMessageOnly) {
             this.directMessageOnly = directMessageOnly;
             return this;
         }
 
+        /**
+         * Sets whether debug logging should be enabled for this command when it is executed.
+         *
+         * @param debug {@code true} to enable debug logging, {@code false} otherwise.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder setDebug(boolean debug) {
             this.isDebug = debug;
             return this;
         }
 
+        /**
+         * Adds one or more Discord permissions that the user invoking the command must possess.
+         *
+         * @param permissions The {@link Permission}(s) required by the user.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder addRequiredPermissions(Permission... permissions) {
             this.permissionsRequired.addAll(Arrays.asList(permissions));
             return this;
         }
 
+        /**
+         * Adds one or more Discord permissions that the bot itself must possess to execute the command.
+         *
+         * @param permissions The {@link Permission}(s) required by the bot.
+         * @return This builder instance for method chaining.
+         */
         public LegacyCommandBuilder addSelfPermissions(Permission... permissions) {
             this.selfPermissionsRequired.addAll(Arrays.asList(permissions));
             return this;
         }
 
+        /**
+         * @return {@code true} if the command reply is set to be deferred.
+         */
         public boolean isDefer() { return isDefer; }
+
+        /**
+         * @return {@code true} if the command is restricted to guilds.
+         */
         public boolean isGuildOnly() { return guildOnly; }
+
+        /**
+         * @return {@code true} if the command is restricted to the bot owner.
+         */
         public boolean isOwnerOnly() { return ownerOnly; }
+
+        /**
+         * @return {@code true} if the command is restricted to private channels.
+         */
         public boolean isPrivateChannelOnly() { return privateChannelOnly; }
+
+        /**
+         * @return {@code true} if the command is restricted to direct messages.
+         */
         public boolean isDirectMessageOnly() { return directMessageOnly; }
+
+        /**
+         * @return {@code true} if debug logging is enabled for this command.
+         */
         public boolean isDebug() { return isDebug; }
+
+        /**
+         * @return A list of permissions required by the user.
+         */
         public List<Permission> getPermissionsRequired() { return permissionsRequired; }
+
+        /**
+         * @return A list of permissions required by the bot itself.
+         */
         public List<Permission> getSelfPermissionsRequired() { return selfPermissionsRequired; }
 
+        /**
+         * A convenience factory method to create a builder pre-configured to automatically defer
+         * the reply and restrict the command execution strictly to Discord guilds.
+         *
+         * @return A new, pre-configured {@link LegacyCommandBuilder} instance.
+         */
         public static LegacyCommandBuilder deferAndOnlyGuild() {
             return new LegacyCommandBuilder().setDefer(true).setGuildOnly(true);
         }
 
+        /**
+         * A convenience factory method to create a builder pre-configured to require the
+         * {@link Permission#ADMINISTRATOR} permission from the user.
+         *
+         * @return A new, pre-configured {@link LegacyCommandBuilder} instance.
+         */
         public static LegacyCommandBuilder guildAdminOnly() {
             return new LegacyCommandBuilder().setGuildOnly(false)
                     .addRequiredPermissions(Permission.ADMINISTRATOR);
