@@ -9,19 +9,18 @@ import java.util.List;
 
 public class BotsConsoleCommand extends AbstractConsoleCommand {
     public BotsConsoleCommand() {
-        super("bots"); // nhập chữ "bots" trên console để hiện list bot đang có
+        super("bots");
     }
 
     @Override
     public void execute(String[] args) {
-        // Lấy danh sách bot từ BotLoader thông qua MultiBotServer
         List<JavaDiscordBot> bots = Main.getServer().getBotLoader().getActiveBots();
         if (bots.isEmpty()) {
             getLogger().info("📦 No bots are loaded on this server.");
             return;
         }
 
-        // Dùng StringBuilder để format danh sách cho đẹp
+        // use StringBuilder to format list
         StringBuilder sb = new StringBuilder();
         sb.append("📦 Running bots (").append(bots.size()).append("):\n");
 
@@ -31,14 +30,12 @@ public class BotsConsoleCommand extends AbstractConsoleCommand {
                     .append(" v").append(meta.botVersion())
                     .append(" | Author: ").append(meta.botAuthor());
 
-            // Nếu có mô tả thì in thêm
             if (meta.botDescription() != null && !meta.botDescription().isBlank()) {
                 sb.append(" - ").append(meta.botDescription());
             }
             sb.append("\n");
         }
 
-        // In toàn bộ kết quả ra màn hình Console
         getLogger().info(sb.toString());
     }
 }

@@ -67,7 +67,7 @@ public class BotLoader implements IBotLoader {
                         botInstance.start();
                         activeBots.add(botInstance);
                     } catch (Exception e) {
-                        logger.error("❌ Lỗi khi khởi động bot {}", meta.botName(), e);
+                        logger.error("An error occured while load bot {}. Is it up to date?", meta.botName(), e);
                     }
                 }, "Bot-" + meta.botName()).start();
 
