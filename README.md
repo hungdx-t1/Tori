@@ -42,14 +42,15 @@ mvn clean package
 This will generate a fat-jar containing all core dependencies located at `tori-server/target/tori-server.jar`.
 
 **Running the Server**
-1. Move the tori-server.jar to your deployment folder.
 
-2. Run the server using:
+Step 1: Move the tori-server.jar to your deployment folder.
+
+Step 2: Run the server using:
 ```bash
 mvn clean package
 ```
 
-3. On the first startup, the server will generate a config.yml file and a bots/ folder.
+Step 3: On the first startup, the server will generate a config.yml file and a bots/ folder.
 
 ---
 
@@ -57,29 +58,29 @@ mvn clean package
 
 Developing a bot for Tori Server is incredibly simple. Your bot project does not need to shade JDA or Log4j2, as Tori Server provides them.
 
-1. Add the Tori API Dependency
+**Step 1: Add the Tori API Dependency**
 
 In your bot's `pom.xml`, include `tori-api` with the `provided` scope:
 
-```XML
-<repositories>
-    <repository>
-        <id>jitpack</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-
-<dependencies>
-    <dependency>
-        <groupId>com.dianxin.tori</groupId>
-        <artifactId>tori-api</artifactId>
-        <version>26.4.231</version>
-        <scope>provided</scope>
-    </dependency>
-</dependencies>
-
 ```
-2. Create the Bot Main Class
+    <repositories>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.dianxin.tori</groupId>
+            <artifactId>tori-api</artifactId>
+            <version>26.4.231</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+```
+
+**Step 2: Create the Bot Main Class**
    
 Extend the `JavaDiscordBot` abstract class:
 
@@ -100,7 +101,7 @@ public class MyAwesomeBot extends JavaDiscordBot {
     }
 }
 ```
-3. Create the `bot.yml` Metadata
+**Step 3: Create the `bot.yml` Metadata**
 
 Create a `bot.yml` file in your `src/main/resources/` directory:
 
@@ -115,7 +116,7 @@ website: "https://example.com"
 ownerId: "0000000000000000" # required
 ```
 
-4. Deploy
+**Step 4: Deploy**
 
 Compile your bot into a standard `.jar` file and drop it into the `bots/` folder of your running Tori Server. Restart the server, and Tori will automatically detect, load, and run your bot in its own Thread!
 

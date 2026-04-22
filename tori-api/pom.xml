@@ -54,15 +54,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.curseletcraft.DianxinCore</groupId>
+            <groupId>com.github.hungdx-t1.DianxinCore2</groupId>
             <artifactId>dianxin-api</artifactId>
-            <version>2.2.5</version>
+            <version>2.4</version>
         </dependency>
 
         <dependency>
-            <groupId>com.github.curseletcraft.DianxinCore</groupId>
+            <groupId>com.github.hungdx-t1.DianxinCore2</groupId>
             <artifactId>dianxin-simple-logger-pack</artifactId>
-            <version>2.2.5</version>
+            <version>2.4</version>
         </dependency>
     </dependencies>
 
