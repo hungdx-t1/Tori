@@ -9,7 +9,6 @@ By leveraging **Java 21 Virtual Threads (Project Loom)** and a strict **API-Serv
 ## ✨ Key Features
 
 * **Multi-Tenant Architecture:** Run multiple standalone Discord bots simultaneously on a single server instance.
-* **Extreme Performance:** Utilizes Java 21 Virtual Threads for non-blocking, lightweight concurrency. Handles heavy bot loads without memory leaks.
 * **Isolated Environments:** Each bot is loaded via its own `URLClassLoader`, ensuring strict class isolation and preventing dependency conflicts between bots.
 * **Clean API Design:** The project is split into `tori-api` (interfaces & providers) and `tori-server` (core implementation). Bot developers only interact with the safe API layer.
 * **Rich Console & Logging:** Powered by **Log4j2**, featuring ANSI color support, custom thread-based bot identification, and an interactive command console (`bots`, `stop`).
@@ -30,7 +29,7 @@ tori/
 ## 🚀 Getting Started
 
 **Prerequisites**
-* Java 21 or higher (Strictly required for Virtual Threads support).
+* Java 21 or higher (Strictly required).
 * Maven 3.8+
 
 **Building the Server**
@@ -96,16 +95,19 @@ public class MyAwesomeBot extends JavaDiscordBot {
 Create a `bot.yml` file in your `src/main/resources/` directory:
 
 ```yaml
-name: "MyAwesomeBot"
+name: "MyAwesomeBot" # required
 version: "1.0.0"
-author: "YourName"
+author: "YourName" # required
 description: "A cool music and moderation bot"
-main: "com.yourdomain.bot.MyAwesomeBot" # Path to your main class
+main: "com.yourdomain.bot.MyAwesomeBot" # Path to your main class, required
+contributors: ["ConName1", "ConName2"]
+website: "https://example.com"
+ownerId: "0000000000000000" # required
 ```
 
 4. Deploy
 
-Compile your bot into a standard `.jar` file and drop it into the `bots/` folder of your running Tori Server. Restart the server, and Tori will automatically detect, load, and run your bot in its own Virtual Thread!
+Compile your bot into a standard `.jar` file and drop it into the `bots/` folder of your running Tori Server. Restart the server, and Tori will automatically detect, load, and run your bot in its own Thread!
 
 ---
 
