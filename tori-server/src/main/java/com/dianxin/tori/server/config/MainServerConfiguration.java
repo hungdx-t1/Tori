@@ -29,5 +29,4 @@ public class MainServerConfiguration implements ServerConfiguration {
     public boolean isGracefulLogOnUnknownInteractionError() {
         return configuration.getBoolean("jda-default.rest-action.graceful-log-on-unknown-interaction-error", true);
     }
-
 }

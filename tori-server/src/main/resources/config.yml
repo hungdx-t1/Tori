@@ -11,7 +11,7 @@ jda-default:
   rest-action:
     # Determines how the system handles RestAction API execution failures.
     #
-    # - false (Default): The system forces explicit error handling using
+    # - false (Default, Recommended): The system forces explicit error handling using
     #   queue(success, failure). This ensures no errors are silently swallowed.
     # - true: The system acts as "fire-and-forget", falling back to queue(success)
     #   and ignoring potential API errors.

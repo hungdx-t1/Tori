@@ -23,7 +23,6 @@ public class JsonCommandBuilder {
 
     public static class CommandDataBuilder {
         public static CommandData of(String commandName, @Nullable String description) {
-            RestAction.setPassContext(true);
             return Commands.slash(commandName, description == null ? "No description provided" : description);
         }
     }
