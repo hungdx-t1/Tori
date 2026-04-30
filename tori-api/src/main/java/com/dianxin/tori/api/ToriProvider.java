@@ -1,6 +1,8 @@
 package com.dianxin.tori.api;
 
 import com.dianxin.core.api.console.commands.ConsoleCommandManager;
+import com.dianxin.core.api.v2.scheduler.Scheduler;
+import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
 
 /**
@@ -54,5 +56,25 @@ public final class ToriProvider {
      */
     public static ConsoleCommandManager getConsoleCommandManager() {
         return get().getConsoleCommandManager();
+    }
+    
+    /**
+     * Retrieves the scheduler responsible for managing timed and scheduled tasks.
+     *
+     * @return The {@link Scheduler} instance.
+     * @throws IllegalStateException if the server has not been initialized yet.
+     */
+    public static Scheduler getScheduler() {
+        return get().getScheduler();
+    }
+
+    /**
+     * Retrieves the bot loader responsible for loading and managing bots.
+     *
+     * @return The {@link IBotLoader} instance.
+     * @throws IllegalStateException if the server has not been initialized yet.
+     */
+    public static IBotLoader getBotLoader() {
+        return get().getBotLoader();
     }
 }
