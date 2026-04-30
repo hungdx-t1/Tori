@@ -114,13 +114,14 @@ public abstract class JavaDiscordBot {
 
         VersionController.checkJDACompatibilityOrThrow();
 
-        JDABuilder jdaBuilder;
+        JDABuilder jdaBuilder; // todo developer can customize this soon
         EnumSet<GatewayIntent> intents = getIntents();
         Activity activity = getActivity();
         AudioModuleConfig audioModuleConfig = getAudioModuleConfig();
 
         String botToken = getBotToken();
 
+        // todo developer can customize this soon
         if(intents == null) {
             jdaBuilder = JDABuilder.createDefault(botToken);
         } else {
@@ -135,6 +136,7 @@ public abstract class JavaDiscordBot {
             jdaBuilder.setAudioModuleConfig(audioModuleConfig);
         }
 
+        // todo developer can customize this soon
         this.jda = jdaBuilder
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build()
