@@ -93,7 +93,44 @@ public abstract class JavaDiscordBot {
         }
     }
 
+    /**
+     * Provides the bot token required for authentication with Discord.
+     *
+     * @return The bot token as a string.
+     */
     protected abstract String getBotToken();
+
+    /**
+     * Creates and configures the JDABuilder with the bot's intents, activity, and audio module config.
+     * <p>
+     * Subclasses can override this method to further customize the JDABuilder.
+     *
+     * @return The configured JDABuilder instance.
+     */
+    protected JDABuilder builder() {
+        JDABuilder jdaBuilder;
+        EnumSet<GatewayIntent> intents = getIntents();
+        Activity activity = getActivity();
+        AudioModuleConfig audioModuleConfig = getAudioModuleConfig();
+
+        String botToken = getBotToken();
+
+        if(intents == null) {
+            jdaBuilder = JDABuilder.createDefault(botToken);
+        } else {
+            jdaBuilder = JDABuilder.createDefault(botToken, intents);
+        }
+
+        if(activity != null) {
+            jdaBuilder.setActivity(activity);
+        }
+
+        if(audioModuleConfig != null) {
+            jdaBuilder.setAudioModuleConfig(audioModuleConfig);
+        }
+
+        return jdaBuilder;
+    }
 
     /**
      * Starts the bot, initializes JDA, loads intents/activity,
@@ -114,29 +151,7 @@ public abstract class JavaDiscordBot {
 
         VersionController.checkJDACompatibilityOrThrow();
 
-        JDABuilder jdaBuilder; // todo developer can customize this soon
-        EnumSet<GatewayIntent> intents = getIntents();
-        Activity activity = getActivity();
-        AudioModuleConfig audioModuleConfig = getAudioModuleConfig();
-
-        String botToken = getBotToken();
-
-        // todo developer can customize this soon
-        if(intents == null) {
-            jdaBuilder = JDABuilder.createDefault(botToken);
-        } else {
-            jdaBuilder = JDABuilder.createDefault(botToken, intents);
-        }
-
-        if(activity != null) {
-            jdaBuilder.setActivity(activity);
-        }
-
-        if(audioModuleConfig != null) {
-            jdaBuilder.setAudioModuleConfig(audioModuleConfig);
-        }
-
-        // todo developer can customize this soon
+        JDABuilder jdaBuilder = this.builder();
         this.jda = jdaBuilder
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build()
