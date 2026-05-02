@@ -263,8 +263,8 @@ public class CommandRegistrar {
         }
 
         updateAction.addCommands(commandDataList).queue(
-                commands -> System.out.println("✅ Updated " + commandDataList.size() + " commands on Discord!"),
-                error -> System.err.println("❌ An error occured when updating commands!" + error.getMessage())
+                commands -> logger.info("✅ Updated {} commands on Discord!", commandDataList.size()),
+                e -> logger.error("❌ An error occured when updating commands!{}", e.getMessage(), e)
         );
     }
 
