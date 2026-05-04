@@ -74,7 +74,7 @@ In your bot's `pom.xml`, include `tori-api` with the `provided` scope:
         <dependency>
             <groupId>com.github.hungdx-t1.Tori</groupId>
             <artifactId>tori-api</artifactId>
-            <version>26.4.235</version>
+            <version>26.4.236</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
