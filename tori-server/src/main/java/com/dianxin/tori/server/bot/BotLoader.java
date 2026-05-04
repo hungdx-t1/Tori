@@ -62,14 +62,7 @@ public class BotLoader implements IBotLoader {
                 setMetaMethod.invoke(botInstance, meta); // inject meta
 
                 // run bot on seperate thread
-                new Thread(() -> {
-                    try {
-                        botInstance.start();
-                        activeBots.add(botInstance);
-                    } catch (Exception e) {
-                        logger.error("An error occured while load bot {}. Is it up to date?", meta.botName(), e);
-                    }
-                }, "Bot-" + meta.botName()).start();
+                new Thread(() -> startBotSafely(botInstance, meta), "Bot-" + meta.botName()).start();
 
             } catch (NoSuchFileException e) {
                 logger.error("⚠️ Cannot run bot {} because file bot.yml is not exist!", jar.getName(), e);
@@ -140,6 +133,46 @@ public class BotLoader implements IBotLoader {
                     botWebsite,
                     ownerId
             );
+        }
+    }
+
+    /**
+     * Safely starts a bot instance with proper error handling and cleanup.
+     * @param botInstance The bot to start
+     * @param meta The bot's metadata
+     */
+    private void startBotSafely(JavaDiscordBot botInstance, IBotMeta meta) {
+        try {
+            botInstance.start();
+            synchronized (activeBots) {
+                activeBots.add(botInstance);
+            }
+            logger.info("✅ Bot {} started successfully!", meta.botName());
+        } catch (Throwable t) {
+            logger.error("❌ Failed to start bot {}. Is it up to date?", meta.botName(), t);
+            shutdownBotGracefully(botInstance, meta);
+        }
+    }
+
+    /**
+     * Attempts to shutdown a bot gracefully with fallback mechanisms.
+     * @param botInstance The bot to shutdown
+     * @param meta The bot's metadata
+     */
+    private void shutdownBotGracefully(JavaDiscordBot botInstance, IBotMeta meta) {
+        try {
+            botInstance.onShutdown();
+            logger.debug("Bot {} shut down gracefully", meta.botName());
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown bot {} normally, attempting force shutdown", meta.botName(), e);
+            try {
+                if (botInstance.getJda() != null) {
+                    botInstance.getJda().shutdownNow();
+                    logger.debug("Bot {} force shut down successfully", meta.botName());
+                }
+            } catch (Exception ex) {
+                logger.error("❌ Critical error: Failed to shutdown bot {} completely. Server restart may be required.", meta.botName(), ex);
+            }
         }
     }
 
