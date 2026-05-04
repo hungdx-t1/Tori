@@ -155,25 +155,63 @@ public class BotLoader implements IBotLoader {
     }
 
     /**
-     * Attempts to shutdown a bot gracefully with fallback mechanisms.
+     * Attempts to shutdown a bot gracefully with comprehensive error handling and multiple fallback mechanisms.
+     * Handles all types of throwables that might occur during shutdown process.
      * @param botInstance The bot to shutdown
      * @param meta The bot's metadata
      */
     private void shutdownBotGracefully(JavaDiscordBot botInstance, IBotMeta meta) {
+        String botName = meta.botName();
+
+        // Phase 1: Try graceful shutdown via onShutdown()
         try {
+            logger.debug("Attempting graceful shutdown for bot {}", botName);
             botInstance.onShutdown();
-            logger.debug("Bot {} shut down gracefully", meta.botName());
-        } catch (Exception e) {
-            logger.warn("Failed to shutdown bot {} normally, attempting force shutdown", meta.botName(), e);
-            try {
-                if (botInstance.getJda() != null) {
-                    botInstance.getJda().shutdownNow();
-                    logger.debug("Bot {} force shut down successfully", meta.botName());
-                }
-            } catch (Exception ex) {
-                logger.error("❌ Critical error: Failed to shutdown bot {} completely. Server restart may be required.", meta.botName(), ex);
-            }
+            logger.info("✅ Bot {} shut down gracefully", botName);
+            return; // Success, no need for further attempts
+        } catch (Throwable t) {
+            logger.warn("❌ Graceful shutdown failed for bot {}: {}", botName, t.getMessage());
+            // Continue to force shutdown attempts
         }
+
+        // Phase 2: Force shutdown via JDA (if available)
+        try {
+            logger.debug("Attempting force shutdown via JDA for bot {}", botName);
+            if (botInstance.getJda() != null) {
+                botInstance.getJda().shutdownNow();
+                logger.info("✅ Bot {} force shut down via JDA", botName);
+                return; // Success
+            } else {
+                logger.debug("JDA instance is null for bot {}, skipping JDA shutdown", botName);
+            }
+        } catch (Throwable t) {
+            logger.warn("❌ Force shutdown via JDA failed for bot {}: {}", botName, t.getMessage());
+            // Continue to final cleanup attempts
+        }
+
+        // Phase 3: Emergency cleanup - try to access JDA directly if possible
+        try {
+            logger.debug("Attempting emergency cleanup for bot {}", botName);
+            // Use reflection to access JDA field directly as last resort
+            java.lang.reflect.Field jdaField = JavaDiscordBot.class.getDeclaredField("jda");
+            jdaField.setAccessible(true);
+            Object jdaInstance = jdaField.get(botInstance);
+
+            if (jdaInstance != null) {
+                // Try to call shutdownNow via reflection
+                java.lang.reflect.Method shutdownMethod = jdaInstance.getClass().getMethod("shutdownNow");
+                shutdownMethod.invoke(jdaInstance);
+                logger.info("✅ Bot {} emergency cleanup successful", botName);
+                return; // Success
+            }
+        } catch (Throwable t) {
+            logger.error("❌ Emergency cleanup failed for bot {}: {}", botName, t.getMessage());
+        }
+
+        // Phase 4: Final failure - log critical error
+        logger.error("🚨 CRITICAL: All shutdown attempts failed for bot {}. " +
+                "Bot resources may not be properly cleaned up. " +
+                "Server restart recommended if issues persist.", botName);
     }
 
     /**
