@@ -78,7 +78,6 @@ public class Main {
             if (botName != null && server != null) {
                 try {
                     log.warn("Attempting to notify server about bot '{}' failure...", botName);
-                    // You could add a method to Server to handle bot failures
                     // server.handleBotFailure(botName, throwable);
                 } catch (Exception e) {
                     log.error("Failed to handle bot failure gracefully", e);
