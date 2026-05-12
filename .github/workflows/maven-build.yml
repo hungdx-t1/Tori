@@ -1,39 +1,37 @@
-# .github/workflows/maven-build.yml
-
 name: Auto Build on Commit
 
-# trigger: run when push on main/master
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ "**" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # download source code to virtual machine
       - uses: actions/checkout@v4
 
-      # install java 21
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      # run build with skip test
-      - name: Build with Maven
+      - name: Build Core version
         run: mvn -B package -DskipTests --file pom.xml
 
-      # upload jar (expires on 90d)
+      - name: Build Full DAVE version
+        run: mvn -B package -P dave-build -DskipTests --file pom.xml
+
+      # Upload toàn bộ JAR (Lấy cả thư mục extension-dave luôn)
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DianxinCore-Build-${{ github.sha }} # rename file with commit ID
+          name: DianxinCore-Build-${{ github.sha }}
           path: |
             tori-api/target/*.jar
             tori-server/target/*.jar
+            tori-extension-dave/target/*.jar
