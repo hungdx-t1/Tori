@@ -93,6 +93,8 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- Begin of music dependencies -->
+
         <!-- Source: https://mvnrepository.com/artifact/dev.arbjerg/lavaplayer -->
         <dependency>
             <groupId>dev.arbjerg</groupId>
@@ -114,6 +116,8 @@
             <artifactId>common</artifactId>
             <version>1.18.1</version>
         </dependency>
+
+        <!-- End of music dependencies -->
     </dependencies>
 
     <build>

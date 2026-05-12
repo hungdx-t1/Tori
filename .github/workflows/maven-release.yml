@@ -1,8 +1,5 @@
-# .github/workflows/maven-release.yml
+name: Build & Release Tori
 
-name: Build & Release DianxinCore
-
-# run when publish release
 on:
   release:
     types: [created]
@@ -11,31 +8,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # grant permission to put file on release
+      contents: write
 
     steps:
-      # download source code to virtual machine
       - uses: actions/checkout@v4
 
-      # install java 21
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
-          cache: maven # Cache library to build faster on future
+          cache: maven
 
-      # run build
-      - name: Build with Maven
+      - name: Build Core version
         run: mvn -B package -DskipTests --file pom.xml
 
-      # upload jar
+      - name: Build Full DAVE version
+        run: mvn -B package -P dave-build -DskipTests --file pom.xml
+
+      # Upload đích danh các file vào Release
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             tori-api/target/tori-api-*.jar
-            tori-server/target/tori-server.jar
+            tori-server/target/tori-server-core.jar
+            tori-server/target/tori-server-full-dave.jar
+            tori-extension-dave/target/tori-extension-dave-*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

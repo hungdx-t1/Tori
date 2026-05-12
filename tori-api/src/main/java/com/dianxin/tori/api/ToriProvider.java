@@ -77,4 +77,8 @@ public final class ToriProvider {
     public static IBotLoader getBotLoader() {
         return get().getBotLoader();
     }
+
+    public static boolean hasJDave() {
+        return get().hasJDave();
+    }
 }

@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-@SuppressWarnings({"unused", "FieldMayBeFinal"})
+@SuppressWarnings({"unused", "FieldMayBeFinal", "UnusedAssignment"})
 public class Server implements ToriServer {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
@@ -27,6 +27,7 @@ public class Server implements ToriServer {
     private ConsoleCommandManager consoleCommandManager;
     private Scheduler scheduler;
     private IBotLoader botLoader;
+    private boolean hasJDave = false;
 
     private static boolean isRunning = false;
 
@@ -48,6 +49,16 @@ public class Server implements ToriServer {
             this.botLoader.loadBots();
         } catch (Exception e) {
             logger.error("An error occured while trying to loading bot on `bots` folder!", e);
+        }
+
+        // check if JDave is embedded in the classpath
+        try {
+            Class.forName("club.minnced.discord.jdave.interop.JDaveSessionFactory");
+            this.hasJDave = true;
+            logger.info("✅ JDave Audio Encryption extension is loaded.");
+        } catch (ClassNotFoundException e) {
+            this.hasJDave = false;
+            logger.info("ℹ️ Running standard version (JDave is not present).");
         }
     }
 
@@ -95,6 +106,8 @@ public class Server implements ToriServer {
         this.consoleCommandManager.register(new StopConsoleCommand());
         this.consoleCommandManager.register(new BotsConsoleCommand());
         this.consoleCommandManager.register(new PingConsoleCommand());
+        this.consoleCommandManager.register(new EnableBotConsoleCommand());
+        this.consoleCommandManager.register(new DisableBotConsoleCommand());
 
         this.consoleCommandManager.startListening();
     }
@@ -117,5 +130,10 @@ public class Server implements ToriServer {
     @Override
     public IBotLoader getBotLoader() {
         return this.botLoader;
+    }
+
+    @Override
+    public boolean hasJDave() {
+        return this.hasJDave;
     }
 }

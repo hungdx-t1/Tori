@@ -30,4 +30,26 @@ public interface IBotLoader {
      * allowing them to safely disconnect their JDA instances and save necessary data.
      */
     void shutdownAll();
+
+    /**
+     * Dynamically loads and starts a bot from a JAR file at runtime.
+     * <p>
+     * This method finds the specified JAR file in the bots directory, reads its metadata,
+     * initializes its class loader, and starts the bot in a separate thread.
+     *
+     * @param jarFileName The name of the bot JAR file (e.g., "MyBot.jar")
+     * @return {@code true} if the bot was successfully enabled, {@code false} otherwise.
+     */
+    boolean enableBot(String jarFileName);
+
+    /**
+     * Gracefully shuts down and removes a bot from the active bots list.
+     * <p>
+     * This method finds the bot by name, calls its {@code onShutdown()} lifecycle event,
+     * and removes it from the list of active bots.
+     *
+     * @param botName The name of the bot to disable (matches the 'name' field in bot.yml)
+     * @return {@code true} if the bot was successfully disabled, {@code false} if not found.
+     */
+    boolean disableBot(String botName);
 }

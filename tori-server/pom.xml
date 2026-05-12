@@ -1,3 +1,5 @@
+<!-- tori-server pom.xml -->
+
 <!--suppress VulnerableLibrariesLocal -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -28,9 +30,37 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <finalName>tori-server</finalName>
+    <profiles>
+        <profile>
+            <id>core-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <finalName>tori-server-core</finalName>
+            </build>
+        </profile>
 
+        <profile>
+            <id>dave-build</id>
+            <properties>
+                <maven.compiler.source>25</maven.compiler.source>
+                <maven.compiler.target>25</maven.compiler.target>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.dianxin.tori</groupId>
+                    <artifactId>tori-extension-dave</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <finalName>tori-server-full-dave</finalName>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

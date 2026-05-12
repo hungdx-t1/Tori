@@ -49,4 +49,6 @@ public interface ToriServer {
      * @return The {@link IBotLoader} instance.
      */
     IBotLoader getBotLoader();
+
+    boolean hasJDave();
 }

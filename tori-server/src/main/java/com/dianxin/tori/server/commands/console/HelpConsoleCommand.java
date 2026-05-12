@@ -19,6 +19,8 @@ public class HelpConsoleCommand extends AbstractConsoleCommand {
         sb.append(" 🔹 bots       - Lists all currently running bots.\n");
         sb.append(" 🔹 ping       - Checks the console responsiveness.\n");
         sb.append(" 🔹 stop       - Safely shuts down all bots and stops the server.\n");
+        sb.append(" 🔹 enablebot  - Dynamically load and start a bot: enablebot <bot_file.jar>\n");
+        sb.append(" 🔹 disablebot - Gracefully stop and unload a bot: disablebot <bot_name>\n");
         sb.append("========================================");
 
         getLogger().info(sb.toString());
