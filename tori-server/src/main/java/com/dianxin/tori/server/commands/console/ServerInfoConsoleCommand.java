@@ -20,7 +20,7 @@ public class ServerInfoConsoleCommand extends AbstractConsoleCommand {
         // Build a beautiful ASCII panel
         StringBuilder sb = new StringBuilder();
         sb.append("\n========================================\n");
-        sb.append("          🦅 TORI SERVER INFO\n");
+        sb.append("          🦅 Tori Server Info\n");
         sb.append("========================================\n");
         sb.append(" 🔹 Tori Version : v").append(Constants.TORI_SERVER_VERSION).append("\n");
         sb.append(" 🔹 JDA Version  : v").append(JDAInfo.VERSION).append("\n");

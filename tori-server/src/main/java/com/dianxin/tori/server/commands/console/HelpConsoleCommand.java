@@ -12,7 +12,7 @@ public class HelpConsoleCommand extends AbstractConsoleCommand {
     public void execute(String[] args) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n========================================\n");
-        sb.append("         🦅 TORI SERVER COMMANDS\n");
+        sb.append("         🦅 Tori Server Commands\n");
         sb.append("========================================\n");
         sb.append(" 🔹 help       - Displays this help menu.\n");
         sb.append(" 🔹 serverinfo - Displays server and system information.\n");
