@@ -31,7 +31,7 @@ public class BotLoader implements IBotLoader {
         }
 
         for (File jar : jarFiles) {
-            logger.info("⏳ Enabling bot file {}...", jar.getName());
+            logger.info("⏳ Loading bot file {} from startup...", jar.getName());
 
             // init ClassLoader for specific bot and turning on
             URL jarUrl = jar.toURI().toURL();
@@ -43,7 +43,7 @@ public class BotLoader implements IBotLoader {
             try {
                 // get meta
                 IBotMeta meta = getBotMetaFromJarFile(botClassLoader, jar);
-                logger.info("🚀 Preparing for load bot: {} (v{}) by {}", meta.botName(), meta.botVersion(), meta.botAuthor());
+                logger.info("🚀 Initializing bot: {} (v{}) by {}", meta.botName(), meta.botVersion(), meta.botAuthor());
 
                 // use Reflection to find Class and initialize Object
                 Class<?> mainClass = Class.forName(meta.mainClassPath(), true, botClassLoader);
@@ -228,5 +228,98 @@ public class BotLoader implements IBotLoader {
             bot.onShutdown();
         }
         System.out.println("✅ All bots are shutdown successfully!");
+    }
+
+    /**
+     * Dynamically loads and starts a bot from a JAR file at runtime.
+     *
+     * @param jarFileName The name of the bot JAR file (e.g., "MyBot.jar")
+     * @return {@code true} if the bot was successfully enabled, {@code false} otherwise.
+     */
+    @Override
+    public boolean enableBot(String jarFileName) {
+        File botsFolder = new File("bots");
+        if (!botsFolder.exists()) {
+            logger.error("❌ Bots folder does not exist!");
+            return false;
+        }
+
+        File jarFile = new File(botsFolder, jarFileName);
+        if (!jarFile.exists()) {
+            logger.error("❌ Bot file '{}' not found in bots folder!", jarFileName);
+            return false;
+        }
+
+        try {
+            logger.info("⏳ Dynamically enabling bot file {}...", jarFileName);
+
+            // Check if bot is already loaded
+            String nameWithoutJar = jarFileName.replace(".jar", "");
+            for (JavaDiscordBot activeBot : activeBots) {
+                if (activeBot.getMeta().botName().equalsIgnoreCase(nameWithoutJar)) {
+                    logger.warn("⚠️ Bot '{}' is already enabled!", nameWithoutJar);
+                    return false;
+                }
+            }
+
+            // Initialize ClassLoader for the bot
+            URL jarUrl = jarFile.toURI().toURL();
+            URLClassLoader botClassLoader = new URLClassLoader(
+                    new URL[]{jarUrl},
+                    this.getClass().getClassLoader()
+            );
+
+            // Get bot metadata
+            IBotMeta meta = getBotMetaFromJarFile(botClassLoader, jarFile);
+            logger.info("🚀 Preparing to load bot: {} (v{}) by {}", meta.botName(), meta.botVersion(), meta.botAuthor());
+
+            // Use Reflection to find and initialize the bot class
+            Class<?> mainClass = Class.forName(meta.mainClassPath(), true, botClassLoader);
+
+            if (!JavaDiscordBot.class.isAssignableFrom(mainClass)) {
+                logger.error("❌ Class '{}' does not extend JavaDiscordBot!", meta.mainClassPath());
+                return false;
+            }
+
+            // Create bot instance
+            JavaDiscordBot botInstance = (JavaDiscordBot) mainClass.getDeclaredConstructor().newInstance();
+
+            // Inject metadata using reflection
+            java.lang.reflect.Method setMetaMethod = JavaDiscordBot.class.getDeclaredMethod("internalSetMeta", IBotMeta.class);
+            setMetaMethod.setAccessible(true);
+            setMetaMethod.invoke(botInstance, meta);
+
+            // Start bot in separate thread
+            new Thread(() -> startBotSafely(botInstance, meta), "Bot-" + meta.botName()).start();
+
+            return true;
+
+        } catch (Exception e) {
+            logger.error("❌ Failed to enable bot '{}': {}", jarFileName, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Gracefully shuts down and removes a bot from the active bots list.
+     *
+     * @param botName The name of the bot to disable (matches the 'name' field in bot.yml)
+     * @return {@code true} if the bot was successfully disabled, {@code false} if not found.
+     */
+    @Override
+    public boolean disableBot(String botName) {
+        synchronized (activeBots) {
+            for (JavaDiscordBot bot : activeBots) {
+                if (bot.getMeta().botName().equalsIgnoreCase(botName)) {
+                    logger.info("⏹ Disabling bot '{}'...", botName);
+                    shutdownBotGracefully(bot, bot.getMeta());
+                    activeBots.remove(bot);
+                    logger.info("✅ Bot '{}' has been disabled successfully!", botName);
+                    return true;
+                }
+            }
+        }
+        logger.warn("⚠️ Bot '{}' is not currently active!", botName);
+        return false;
     }
 }
