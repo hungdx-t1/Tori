@@ -78,6 +78,15 @@ public final class ToriProvider {
         return get().getBotLoader();
     }
 
+    /**
+     * Checks if the JDave Audio Encryption extension is available in the classpath.
+     * <p>
+     * JDave is an optional audio encryption module that provides enhanced audio security features.
+     * This method can be used to conditionally enable or disable advanced audio functionality.
+     *
+     * @return {@code true} if JDave is loaded and available, {@code false} otherwise.
+     * @throws IllegalStateException if the server has not been initialized yet.
+     */
     public static boolean hasJDave() {
         return get().hasJDave();
     }
