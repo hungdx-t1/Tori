@@ -22,6 +22,7 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Source: https://mvnrepository.com/artifact/org.reflections/reflections -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
