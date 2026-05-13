@@ -44,8 +44,14 @@ public class Server implements ToriServer {
         this.initConsoleCommandManager();
         this.scheduler = new SchedulerImpl();
         this.botLoader = new BotLoader();
+        this.hasJDave = false; // Default to false, will be checked in Main
+    }
 
-        // check if JDave is embedded in the classpath
+    /**
+     * Initializes JDave extension if available.
+     * This method should be called AFTER Server construction to avoid blocking initialization.
+     */
+    public void initializeJDave() {
         try {
             Class.forName("club.minnced.discord.jdave.interop.JDaveSessionFactory");
             this.hasJDave = true;
@@ -53,6 +59,10 @@ public class Server implements ToriServer {
         } catch (ClassNotFoundException e) {
             this.hasJDave = false;
             logger.info("ℹ️ Running standard version (JDave is not present).");
+        } catch (UnsupportedClassVersionError | NoClassDefFoundError e) {
+            this.hasJDave = false;
+            logger.warn("⚠️ JDave is present but cannot be loaded due to version mismatch: {}", e.getMessage());
+            throw e; // Re-throw to be caught in Main
         }
     }
 
