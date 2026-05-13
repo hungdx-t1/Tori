@@ -1,0 +1,147 @@
+[GachCloud Daemon]: Checking server disk space usage, this could take a few seconds...
+[GachCloud Daemon]: Updating process configuration files...
+[GachCloud Daemon]: Ensuring file permissions are set correctly, this could take a few seconds...
+container@gachcloud~ Server marked as starting...
+[GachCloud Daemon]: Pulling Docker container image, this could take a few minutes to complete...
+[GachCloud Daemon]: Finished pulling Docker container image
+container@gachcloud~ java -version
+openjdk version "21.0.10" 2026-01-20 LTS
+OpenJDK Runtime Environment Temurin-21.0.10+7 (build 21.0.10+7-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.10+7 (build 21.0.10+7-LTS, mixed mode, sharing)
+container@gachcloud~ java -Xms128M -Xmx870M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -Dterminal.jline=false -Dterminal.ansi=true -DPaper.IgnoreJavaVersion=true -Dcom.mojang.eula.agree=true -Djansi.force=true -Dterminal.jline=true -Dterminal.ansi=true -jar server.jar
+[09:11:13] INFO  [main] [tori.server.Main] - Starting Tori server, please wait...
+[09:11:13] INFO  [main] [tori.server.ToriBootstrap] - Loading configuration...
+[09:11:13] INFO  [main] [tori.server.ToriBootstrap] - Read config file successful!
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: help
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: serverinfo
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: stop
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: bots
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: ping
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: enablebot
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: disablebot
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ✅ Registered console command: debug
+[09:11:13] INFO  [main] [console.commands.ConsoleCommandManager] - ConsoleCommandListener start.
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file BurgerberryBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: BurgerberryBot (v1.0) by MinoMC_YTB
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file AjaxBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: AjaxBot (v1.0) by MinoMC_YTB
+[09:11:13] ERROR [main] [server.bot.BotLoader] - ❌ Couldn't load bot AjaxBot.jar. Is it up to date?
+java.lang.UnsupportedClassVersionError: mino/dx/curseletcraft/ajax/AjaxBot has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0
+        at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+        at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+        at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150) ~[?:?]
+        at java.base/java.net.URLClassLoader.defineClass(URLClassLoader.java:524) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:427) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:421) ~[?:?]
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:714) ~[?:?]
+        at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:420) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+        at java.base/java.lang.Class.forName0(Native Method) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:536) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:515) ~[?:?]
+        at com.dianxin.tori.server.bot.BotLoader.loadBots(BotLoader.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Server.<init>(Server.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Main.main(Main.java:34) [server.jar:?]
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file YetiBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: YetiBot (v1.0) by MinoMC_YTB
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file ZetabyteBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: ZetabyteBot (v2.4) by MinoMC_YTB
+[09:11:13] ERROR [main] [server.bot.BotLoader] - ❌ Couldn't load bot ZetabyteBot.jar. Is it up to date?
+java.lang.UnsupportedClassVersionError: mino/dx/curseletcraft/zetabyte/ZetabyteBot has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0
+        at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+        at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+        at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150) ~[?:?]
+        at java.base/java.net.URLClassLoader.defineClass(URLClassLoader.java:524) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:427) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:421) ~[?:?]
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:714) ~[?:?]
+        at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:420) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+        at java.base/java.lang.Class.forName0(Native Method) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:536) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:515) ~[?:?]
+        at com.dianxin.tori.server.bot.BotLoader.loadBots(BotLoader.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Server.<init>(Server.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Main.main(Main.java:34) [server.jar:?]
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file QuangDoiConLaiBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: QuangDoiConLaiBot (v1) by MinoMC_YTB
+[09:11:13] INFO  [main] [server.bot.BotLoader] - ⏳ Loading bot file XyriusBot.jar from startup...
+[09:11:13] INFO  [main] [server.bot.BotLoader] - 🚀 Initializing bot: XyriusBot (v1.0) by MinoMC_YTB
+[09:11:13] ERROR [main] [server.bot.BotLoader] - ❌ Couldn't load bot XyriusBot.jar. Is it up to date?
+java.lang.UnsupportedClassVersionError: mino/dx/curseletcraft/xyrius/XyriusBot has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0
+        at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+        at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+        at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150) ~[?:?]
+        at java.base/java.net.URLClassLoader.defineClass(URLClassLoader.java:524) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:427) ~[?:?]
+        at java.base/java.net.URLClassLoader$1.run(URLClassLoader.java:421) ~[?:?]
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:714) ~[?:?]
+        at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:420) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593) ~[?:?]
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+        at java.base/java.lang.Class.forName0(Native Method) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:536) ~[?:?]
+        at java.base/java.lang.Class.forName(Class.java:515) ~[?:?]
+        at com.dianxin.tori.server.bot.BotLoader.loadBots(BotLoader.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Server.<init>(Server.java:49) [server.jar:?]
+        at com.dianxin.tori.server.Main.main(Main.java:34) [server.jar:?]
+Exception in thread "main" java.lang.UnsupportedClassVersionError: club/minnced/discord/jdave/interop/JDaveSessionFactory has been compiled by a more recent version of the Java Runtime (class file version 69.0), this version of the Java Runtime only recognizes class file versions up to 65.0
+        at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+        at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027)
+        at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+        at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+        at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+        at java.base/java.lang.Class.forName0(Native Method)
+        at java.base/java.lang.Class.forName(Class.java:423)
+        at java.base/java.lang.Class.forName(Class.java:414)
+        at com.dianxin.tori.server.Server.<init>(Server.java:56)
+        at com.dianxin.tori.server.Main.main(Main.java:34)
+[09:11:15] INFO  [Bot-QuangDoiConLaiBot] [jda.api.JDA] - Login Successful!
+[09:11:15] INFO  [Bot-BurgerberryBot] [jda.api.JDA] - Login Successful!
+[09:11:15] INFO  [Bot-YetiBot] [jda.api.JDA] - Login Successful!
+[09:11:16] INFO  [JDA MainWS-WriteThread] [internal.requests.WebSocketClient] - Connected to WebSocket
+[09:11:16] INFO  [JDA MainWS-ReadThread] [internal.requests.WebSocketClient] - Connected to WebSocket
+[09:11:16] INFO  [JDA MainWS-ReadThread] [internal.requests.WebSocketClient] - Connected to WebSocket
+[09:11:16] INFO  [JDA MainWS-ReadThread] [jda.api.JDA] - Finished Loading!
+[09:11:16] INFO  [JDA MainWS-ReadThread] [jda.api.JDA] - Finished Loading!
+[09:11:16] ERROR [Bot-QuangDoiConLaiBot] [server.bot.BotLoader] - ❌ Failed to start bot QuangDoiConLaiBot. Is it up to date?
+java.lang.IllegalStateException: ToriServer is not initialized!
+        at com.dianxin.tori.api.ToriProvider.get(ToriProvider.java:36) ~[server.jar:?]
+        at com.dianxin.tori.api.ToriProvider.getConfig(ToriProvider.java:48) ~[server.jar:?]
+        at com.dianxin.tori.api.bot.JavaDiscordBot.start(JavaDiscordBot.java:160) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.startBotSafely(BotLoader.java:146) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.lambda$loadBots$1(BotLoader.java:65) ~[server.jar:?]
+        at java.base/java.lang.Thread.run(Thread.java:1583) [?:?]
+[09:11:16] ERROR [Bot-BurgerberryBot] [server.bot.BotLoader] - ❌ Failed to start bot BurgerberryBot. Is it up to date?
+java.lang.IllegalStateException: ToriServer is not initialized!
+        at com.dianxin.tori.api.ToriProvider.get(ToriProvider.java:36) ~[server.jar:?]
+        at com.dianxin.tori.api.ToriProvider.getConfig(ToriProvider.java:48) ~[server.jar:?]
+        at com.dianxin.tori.api.bot.JavaDiscordBot.start(JavaDiscordBot.java:160) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.startBotSafely(BotLoader.java:146) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.lambda$loadBots$1(BotLoader.java:65) ~[server.jar:?]
+        at java.base/java.lang.Thread.run(Thread.java:1583) [?:?]
+[09:11:16] INFO  [Bot-QuangDoiConLaiBot] [curseletcraft.quangdoiconlaibot.QuangDoiConLaiBot] - QuangDoiConLaiBot is shutting down...
+[09:11:16] INFO  [Bot-QuangDoiConLaiBot] [curseletcraft.quangdoiconlaibot.QuangDoiConLaiBot] - ⏹ Shutting down bot QuangDoiConLaiBot...
+[09:11:16] INFO  [Bot-QuangDoiConLaiBot] [server.bot.BotLoader] - ✅ Bot QuangDoiConLaiBot shut down gracefully
+[09:11:16] WARN  [Bot-BurgerberryBot] [server.bot.BotLoader] - ❌ Graceful shutdown failed for bot BurgerberryBot: Cannot invoke "mino.dx.curseletcraft.burgerberry.event.GDEventListener.close()" because "this.gdEventListener" is null
+[09:11:16] INFO  [Bot-BurgerberryBot] [server.bot.BotLoader] - ✅ Bot BurgerberryBot force shut down via JDA
+[09:11:16] INFO  [JDA MainWS-ReadThread] [jda.api.JDA] - Finished Loading!
+[09:11:16] ERROR [Bot-YetiBot] [server.bot.BotLoader] - ❌ Failed to start bot YetiBot. Is it up to date?
+java.lang.IllegalStateException: ToriServer is not initialized!
+        at com.dianxin.tori.api.ToriProvider.get(ToriProvider.java:36) ~[server.jar:?]
+        at com.dianxin.tori.api.ToriProvider.getConfig(ToriProvider.java:48) ~[server.jar:?]
+        at com.dianxin.tori.api.bot.JavaDiscordBot.start(JavaDiscordBot.java:160) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.startBotSafely(BotLoader.java:146) ~[server.jar:?]
+        at com.dianxin.tori.server.bot.BotLoader.lambda$loadBots$1(BotLoader.java:65) ~[server.jar:?]
+        at java.base/java.lang.Thread.run(Thread.java:1583) [?:?]
+[09:11:16] INFO  [Bot-YetiBot] [curseletcraft.yeti.YetiBot] - ⏹ Shutting down bot YetiBot...
+[09:11:16] INFO  [Bot-YetiBot] [server.bot.BotLoader] - ✅ Bot YetiBot shut down gracefully
+container@gachcloud~ Server marked as stopping...
+stop
+[09:11:37] ERROR [ConsoleCommandListener] [console.commands.ConsoleCommandManager] - An error occured when trying to execute command 'stop': Tori server has not been initialized!

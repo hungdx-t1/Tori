@@ -44,14 +44,14 @@ public class Server implements ToriServer {
         this.initConsoleCommandManager();
         this.scheduler = new SchedulerImpl();
         this.botLoader = new BotLoader();
+        this.hasJDave = false; // Default to false, will be checked in Main
+    }
 
-        try {
-            this.botLoader.loadBots();
-        } catch (Exception e) {
-            logger.error("An error occured while trying to loading bot on `bots` folder!", e);
-        }
-
-        // check if JDave is embedded in the classpath
+    /**
+     * Initializes JDave extension if available.
+     * This method should be called AFTER Server construction to avoid blocking initialization.
+     */
+    public void initializeJDave() {
         try {
             Class.forName("club.minnced.discord.jdave.interop.JDaveSessionFactory");
             this.hasJDave = true;
@@ -59,6 +59,10 @@ public class Server implements ToriServer {
         } catch (ClassNotFoundException e) {
             this.hasJDave = false;
             logger.info("ℹ️ Running standard version (JDave is not present).");
+        } catch (UnsupportedClassVersionError | NoClassDefFoundError e) {
+            this.hasJDave = false;
+            logger.warn("⚠️ JDave is present but cannot be loaded due to version mismatch: {}", e.getMessage());
+            throw e; // Re-throw to be caught in Main
         }
     }
 
@@ -73,6 +77,20 @@ public class Server implements ToriServer {
         scheduler.shutdown();
 
         logger.info("Done! Good bye!");
+    }
+
+    /**
+     * Initializes and loads all bot files from the bots folder.
+     * This method should be called after {@link com.dianxin.tori.api.ToriProvider#setServer(ToriServer)}
+     * to ensure bots can access the ToriProvider without race conditions.
+     */
+    public void initializeBots() {
+        try {
+            logger.info("Initializing bot loading system...");
+            this.botLoader.loadBots();
+        } catch (Exception e) {
+            logger.error("An error occurred while loading bots from the 'bots' folder!", e);
+        }
     }
 
     private void initConfig() {
