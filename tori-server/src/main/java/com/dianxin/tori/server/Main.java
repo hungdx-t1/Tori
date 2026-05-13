@@ -75,6 +75,9 @@ public class Main {
             } else if (throwable instanceof IllegalStateException) {
                 log.error("[ILLEGAL-STATE] Thread '{}' encountered an illegal state: {}",
                         threadName, throwable.getMessage(), throwable);
+            } else if (throwable instanceof UnsupportedClassVersionError) {
+                log.error("[UNSUPPORTED-JAVA-VERSION] Thread '{}' failed to load a class due to incompatible Java version: {}",
+                        threadName, throwable.getMessage(), throwable);
             } else {
                 // Default handling for other exceptions
                 if (botName != null) {
