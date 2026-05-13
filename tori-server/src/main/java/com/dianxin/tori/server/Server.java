@@ -108,6 +108,7 @@ public class Server implements ToriServer {
         this.consoleCommandManager.register(new PingConsoleCommand());
         this.consoleCommandManager.register(new EnableBotConsoleCommand());
         this.consoleCommandManager.register(new DisableBotConsoleCommand());
+        this.consoleCommandManager.register(new DebugConsoleCommand());
 
         this.consoleCommandManager.startListening();
     }
