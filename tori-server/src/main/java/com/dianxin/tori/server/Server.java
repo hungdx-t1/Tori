@@ -45,12 +45,6 @@ public class Server implements ToriServer {
         this.scheduler = new SchedulerImpl();
         this.botLoader = new BotLoader();
 
-        try {
-            this.botLoader.loadBots();
-        } catch (Exception e) {
-            logger.error("An error occured while trying to loading bot on `bots` folder!", e);
-        }
-
         // check if JDave is embedded in the classpath
         try {
             Class.forName("club.minnced.discord.jdave.interop.JDaveSessionFactory");
@@ -73,6 +67,20 @@ public class Server implements ToriServer {
         scheduler.shutdown();
 
         logger.info("Done! Good bye!");
+    }
+
+    /**
+     * Initializes and loads all bot files from the bots folder.
+     * This method should be called after {@link com.dianxin.tori.api.ToriProvider#setServer(ToriServer)}
+     * to ensure bots can access the ToriProvider without race conditions.
+     */
+    public void initializeBots() {
+        try {
+            logger.info("Initializing bot loading system...");
+            this.botLoader.loadBots();
+        } catch (Exception e) {
+            logger.error("An error occurred while loading bots from the 'bots' folder!", e);
+        }
     }
 
     private void initConfig() {

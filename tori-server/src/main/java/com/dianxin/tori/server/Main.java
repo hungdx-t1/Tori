@@ -33,19 +33,23 @@ public class Main {
         ServerConfiguration config = ToriBootstrap.init();
         server = new Server(config);
 
+        // Set ToriProvider immediately to avoid race conditions with bot initialization
         ToriProvider.setServer(server);
 
-        // Check Java version if JDave is present (requires Java 25+)
-        if(ToriProvider.hasJDave()) {
-            try {
+        // Check JDave compatibility with proper error handling
+        try {
+            if(ToriProvider.hasJDave()) {
                 VersionController.checkJavaVersionForJDaveOrThrow();
                 log.info("✅ JDave audio encryption is enabled. Java version check passed.");
-            } catch (UnsupportedOperationException e) {
-                log.error("❌ {}", e.getMessage(), e);
-                System.exit(-1);
-                return;
             }
+        } catch (UnsupportedOperationException | NoClassDefFoundError | UnsupportedClassVersionError e) {
+            log.error("❌ JDave compatibility check failed: {}", e.getMessage(), e);
+            System.exit(-1);
+            return;
         }
+
+        // Initialize bots AFTER ToriProvider is set and JDave check is complete
+        server.initializeBots();
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             String threadName = thread.getName();
