@@ -19,9 +19,8 @@ Tori maintains multiple versions and distributions (Core vs. Full/JDave). Please
 ### 🚫 Never PR directly to `main`
 The `main` branch represents the currently released, stable version. We do not accept direct PRs to `main` unless it is a critical hotfix for a severe bug in the current release.
 
-### ✅ PR to the `version/x.x.x` branch
-When contributing a new feature or fixing a non-critical bug, you **must** target your PR to the active development branch (e.g., `version/26.5.120`).
-- If you are unsure which branch is the current development branch, please ask in the Issues section or check the most recently updated `version/` branch.
+### ✅ PR to the `develop` branch
+When contributing a new feature or fixing a non-critical bug, you **must** target your PR to the active development branch.
 
 ---
 
@@ -51,7 +50,7 @@ mvn clean package -P dave-build
 
 1. **Fork the repository** and clone it to your local machine.
 
-2. **Create a new branch** from the target development branch (e.g., `git checkout -b feature/my-awesome-feature origin/version/26.5.120`).
+2. **Create a new branch** from the `develop` branch (e.g., `git checkout -b feature/my-awesome-feature origin/develop`).
 
 3. **Make your changes** and commit them. Please write clear, concise commit messages.
 
@@ -60,12 +59,13 @@ mvn clean package -P dave-build
 5. **Push your branch** to your fork.
 
 6. **Open a Pull Request.**
+* Ensure the "base branch" is set to `develop`.
 * Fill out the PR template completely.
 * Describe what you changed and why.
 * Reference any related Issues (e.g., "Fixes #12").
 
 # Code Review
-Once your PR is submitted, the maintainers will review your code. We might ask for changes or clarifications. Please be patient and responsive. Once everything looks good, and the GitHub Actions CI passes (✅), your PR will be merged into the development branch!
+Once your PR is submitted, the maintainers will review your code. We might ask for changes or clarifications. Please be patient and responsive. Once everything looks good, and the GitHub Actions CI passes (✅), your PR will be merged into the `develop` branch!
 
 --- 
 
