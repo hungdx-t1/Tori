@@ -34,4 +34,12 @@ public interface ServerConfiguration {
      * {@code false} if they prints the full {@link ErrorResponseException} and {@link ContextException} stack traces.
      */
     boolean isGracefulLogOnUnknownInteractionError();
+
+    /**
+     * Checks whether the global debug mode is enabled for the server.
+     * When enabled, additional trace and debug level logging will be output to the console.
+     *
+     * @return {@code true} if debug mode is active, {@code false} otherwise.
+     */
+    boolean isDebug();
 }

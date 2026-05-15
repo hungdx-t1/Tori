@@ -23,9 +23,9 @@
             <AppenderRef ref="File"/>
         </Root>
 
-        <Logger name="com.dianxin.core" level="debug" additivity="false">
-            <AppenderRef ref="TerminalConsole"/>
-            <AppenderRef ref="File"/>
-        </Logger>
+<!--        <Logger name="com.dianxin.core" level="debug" additivity="false">-->
+<!--            <AppenderRef ref="TerminalConsole"/>-->
+<!--            <AppenderRef ref="File"/>-->
+<!--        </Logger>-->
     </Loggers>
 </Configuration>

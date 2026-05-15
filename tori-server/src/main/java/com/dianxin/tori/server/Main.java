@@ -4,6 +4,8 @@ import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,13 @@ public class Main {
         }
 
         ServerConfiguration config = ToriBootstrap.init();
+
+        // check whether debug config section is enabled
+        if(config.isDebug()) {
+            Configurator.setRootLevel(Level.DEBUG);
+            log.debug("⚙️ Debug mode enabled globally via config.yml!");
+        }
+
         server = new Server(config);
 
         // Set ToriProvider immediately to avoid race conditions with bot initialization

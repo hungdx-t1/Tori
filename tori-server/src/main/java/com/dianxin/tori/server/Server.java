@@ -61,8 +61,7 @@ public class Server implements ToriServer {
             logger.info("ℹ️ Running standard version (JDave is not present).");
         } catch (UnsupportedClassVersionError | NoClassDefFoundError e) {
             this.hasJDave = false;
-            logger.warn("⚠️ JDave is present but cannot be loaded due to version mismatch: {}", e.getMessage());
-            throw e; // Re-throw to be caught in Main
+            logger.warn("⚠️ JDave is present but cannot be loaded due to version mismatch: {}", e.getMessage(), e);
         }
     }
 

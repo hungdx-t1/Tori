@@ -3,6 +3,18 @@
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
+# Console & Logging Configuration
+# ------------------------------------------------------------------------------
+console:
+  # Enables or disables global debug logging for the Tori Server and all hosted bots.
+  #
+  # - true: Outputs detailed debug and trace information to the terminal.
+  #   Highly recommended for developers when troubleshooting or testing new bots.
+  # - false (Default): Keeps the console clean. Only outputs INFO, WARN, ERROR,
+  #   and FATAL messages. Recommended for live production environments.
+  debug: false
+
+# ------------------------------------------------------------------------------
 # JDA (Java Discord API) Default Configuration
 # These are the default settings applied to every bot instance running
 # within the Tori Server environment.

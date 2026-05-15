@@ -90,6 +90,7 @@ public class CommandRegistrar {
             if (cmd instanceof MaincommandRegistry registry) {
                 String commandName = registry.getCommand().getName();
                 slashCmds.put(commandName, cmd);
+                logger.debug("✅ Registered slash command: **{}**", commandName);
             } else {
                 throw new IllegalArgumentException("Command " + cmd.getClass().getSimpleName() + " must implements MaincommandRegistry!");
             }
@@ -114,6 +115,7 @@ public class CommandRegistrar {
             if (cmd instanceof MaincommandRegistry registry) {
                 String commandName = registry.getCommand().getName();
                 slashCmds.put(commandName, cmd);
+                logger.debug("✅ Registered slash command: **{}**", commandName);
             } else {
                 throw new IllegalArgumentException("Command " + cmd.getClass().getSimpleName() + " must implements MaincommandRegistry!");
             }
@@ -136,7 +138,7 @@ public class CommandRegistrar {
         for (BaseUserContextMenu cmd : contextMenu) {
             String title = cmd.getTitle();
             userContextCmds.putIfAbsent(title, cmd);
-            logger.info("✅ Registered user context menu: **{}**", title);
+            logger.debug("✅ Registered user context menu: **{}**", title);
         }
 
         return this;
@@ -170,7 +172,7 @@ public class CommandRegistrar {
             }
 
             userContextCmds.putIfAbsent(interactionName, cmd);
-            logger.info("✅ Registered user context menu: **{}**", interactionName);
+            logger.debug("✅ Registered user context menu: **{}**", interactionName);
         }
 
         return this;
@@ -191,7 +193,7 @@ public class CommandRegistrar {
         for (BaseMessageContextMenu cmd : contextMenus) {
             String title = cmd.getTitle();
             messageContextCmds.putIfAbsent(title, cmd);
-            logger.info("✅ Registered message context menu: **{}**", title);
+            logger.debug("✅ Registered message context menu: **{}**", title);
         }
 
         return this;
@@ -225,7 +227,7 @@ public class CommandRegistrar {
             }
 
             messageContextCmds.putIfAbsent(interactionName, cmd);
-            logger.info("✅ Registered message context menu: **{}**", interactionName);
+            logger.debug("✅ Registered message context menu: **{}**", interactionName);
         }
 
         return this;

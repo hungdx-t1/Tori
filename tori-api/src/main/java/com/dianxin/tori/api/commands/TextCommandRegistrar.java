@@ -64,7 +64,7 @@ public class TextCommandRegistrar {
                 textCommandMap.putIfAbsent(alias.toLowerCase(), cmd);
             }
 
-            logger.info("✅ Registered text command: **{}** {}", commandName,
+            logger.debug("✅ Registered text command: **{}** {}", commandName,
                     cmd.getAliases().isEmpty() ? "" : "(Aliases: " + String.join(", ", cmd.getAliases()) + ")");
         }
         return this;
@@ -97,7 +97,7 @@ public class TextCommandRegistrar {
                 textCommandMap.putIfAbsent(alias.toLowerCase(), cmd);
             }
 
-            logger.info("✅ Registered text command: **{}** {}", commandName,
+            logger.debug("✅ Registered text command: **{}** {}", commandName,
                     ann.aliases().length == 0 ? "" : "(Aliases: " + String.join(", ", ann.aliases()) + ")");
         }
         return this;

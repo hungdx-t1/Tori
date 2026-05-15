@@ -66,6 +66,8 @@ public class BotLoader implements IBotLoader {
 
             } catch (NoSuchFileException e) {
                 logger.error("⚠️ Cannot run bot {} because file bot.yml is not exist!", jar.getName(), e);
+            } catch (UnsupportedClassVersionError error) {
+                logger.error("❌ Cannot load this bot. This bot is compiled with a newer version of Java: {}", jar.getName(), error);
             } catch (Throwable t) {
                 logger.error("❌ Couldn't load bot {}. Is it up to date?", jar.getName(), t);
             }

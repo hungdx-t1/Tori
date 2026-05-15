@@ -74,7 +74,15 @@ In your bot's `pom.xml`, include `tori-api` with the `provided` scope:
         <dependency>
             <groupId>com.github.hungdx-t1.Tori</groupId>
             <artifactId>tori-api</artifactId>
-            <version>26.4.241</version>
+            <version>{latest_version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Optional: If you want to use the Dave music extension, add this dependency as well -->
+        <dependency>
+            <groupId>com.github.hungdx-t1.Tori</groupId>
+            <artifactId>tori-extension-dave</artifactId>
+            <version>{latest_version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
