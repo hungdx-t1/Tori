@@ -164,13 +164,16 @@ public class BotLoader implements IBotLoader {
      */
     private void shutdownBotGracefully(JavaDiscordBot botInstance, IBotMeta meta) {
         String botName = meta.botName();
+        boolean jdaShutdownSuccess = false;
 
         // Phase 1: Try graceful shutdown via onShutdown()
         try {
             logger.debug("Attempting graceful shutdown for bot {}", botName);
             botInstance.onShutdown();
-            logger.info("✅ Bot {} shut down gracefully", botName);
-            return; // Success, no need for further attempts
+            logger.info("✅ Bot {} shut down gracefully (Phase 1)", botName);
+            // return; // Success, no need for further attempts -> removed when try to disable bot completely
+        } catch (NoClassDefFoundError classError) {
+            logger.warn("⚠️ Bot {} JAR file was likely deleted or modified while running! Skipping graceful logic.", botName, classError);
         } catch (Throwable t) {
             logger.warn("❌ Graceful shutdown failed for bot {}: {}", botName, t.getMessage());
             // Continue to force shutdown attempts
@@ -181,8 +184,9 @@ public class BotLoader implements IBotLoader {
             logger.debug("Attempting force shutdown via JDA for bot {}", botName);
             if (botInstance.getJda() != null) {
                 botInstance.getJda().shutdownNow();
-                logger.info("✅ Bot {} force shut down via JDA", botName);
-                return; // Success
+                jdaShutdownSuccess = true;
+                logger.info("✅ Bot {} force shut down via JDA successful", botName);
+                // return; // Success
             } else {
                 logger.debug("JDA instance is null for bot {}, skipping JDA shutdown", botName);
             }
@@ -190,6 +194,8 @@ public class BotLoader implements IBotLoader {
             logger.warn("❌ Force shutdown via JDA failed for bot {}: {}", botName, t.getMessage());
             // Continue to final cleanup attempts
         }
+
+        /*  --- Comment since 26.5.161: Remove emergency cleanup to avoid potential issues with reflection and class loading in unstable bot states ---
 
         // Phase 3: Emergency cleanup - try to access JDA directly if possible
         try {
@@ -214,6 +220,23 @@ public class BotLoader implements IBotLoader {
         logger.error("🚨 CRITICAL: All shutdown attempts failed for bot {}. " +
                 "Bot resources may not be properly cleaned up. " +
                 "Server restart recommended if issues persist.", botName);
+
+         */
+
+        // -- release since 26.5.161: close classloader to release jar on RAM to prevent NoClassDefFoundError has thrown.
+        try {
+            ClassLoader loader = botInstance.getClass().getClassLoader();
+            if (loader instanceof URLClassLoader urlClassLoader) {
+                urlClassLoader.close();
+                logger.debug("🔒 Closed ClassLoader for bot {}", botName);
+            }
+        } catch (Throwable t) {
+            logger.error("❌ Failed to close ClassLoader for bot {}", botName, t);
+        }
+
+        if (!jdaShutdownSuccess && botInstance.getJda() != null) {
+            logger.error("🚨 CRITICAL: Failed to shutdown JDA for bot {}. Ghost connection may persist!", botName);
+        }
     }
 
     /**
