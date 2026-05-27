@@ -3,6 +3,7 @@ package com.dianxin.tori.api.config;
 import com.dianxin.core.api.config.yaml.FileConfiguration;
 import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Represents the core configuration settings for the Tori Server.
@@ -42,4 +43,7 @@ public interface ServerConfiguration {
      * @return {@code true} if debug mode is active, {@code false} otherwise.
      */
     boolean isDebug();
+
+    @ApiStatus.Internal
+    boolean isSuppressingSomePackageOnStackTraceEnabled();
 }
