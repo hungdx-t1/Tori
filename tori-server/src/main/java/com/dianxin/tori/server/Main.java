@@ -9,6 +9,10 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Instant;
 
 public class Main {
@@ -113,6 +117,10 @@ public class Main {
             }
         });
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown, "Tori-Shutdown-Thread"));
+
+        log.info("Generating startup scripts...");
+        generateStartupScripts();
+
         log.info("Tori Server has been started in {} ms!", System.currentTimeMillis() - BOOT_TIME.toEpochMilli());
         log.info("Ready!");
         log.info("Using Tori server v{}", Constants.TORI_SERVER_VERSION);
@@ -123,5 +131,87 @@ public class Main {
             throw new IllegalStateException("Tori server has not been initialized!");
         }
         return server;
+    }
+
+    private static void generateStartupScripts() {
+        // start.cmd
+        String batContent = """
+                @echo off
+                title Tori Server - Script
+                cls
+                
+                :loop
+                echo [Tori Bootstrapper] Starting Tori Server...
+                java -jar server.jar
+                set EXIT_CODE=%ERRORLEVEL%
+                
+                echo.
+                echo [Tori Bootstrapper] Server exited with code %EXIT_CODE%
+                echo.
+                
+                if %EXIT_CODE% equ 42 (
+                    echo [Tori Bootstrapper] Restart signal received (Code 42).
+                    echo [Tori Bootstrapper] Rebooting server in 3 seconds...
+                    timeout /t 3 >nul
+                    cls
+                    goto loop
+                )
+                
+                echo [Tori Bootstrapper] Server stopped permanently (Normal exit).
+                pause
+                """;
+
+        // start.sh
+        String shContent = """
+                #!/bin/bash
+                
+                # Clear terminal screen
+                clear
+                
+                while true; do
+                    echo "[Tori Bootstrapper] Starting Tori Server..."
+                    
+                    java -jar server.jar
+                    EXIT_CODE=$?
+                    
+                    echo ""
+                    echo "[Tori Bootstrapper] Server exited with code $EXIT_CODE"
+                    echo ""
+                    
+                    if [ $EXIT_CODE -eq 42 ]; then
+                        echo "[Tori Bootstrapper] Restart signal received (Code 42)."
+                        echo "[Tori Bootstrapper] Rebooting server in 3 seconds..."
+                        sleep 3
+                        clear
+                    else
+                        echo "[Tori Bootstrapper] Server stopped permanently (Normal exit)."
+                        break
+                    fi
+                done
+                """;
+
+        File batFile = new File("start.cmd");
+        File shFile = new File("start.sh");
+
+        try {
+            // only create file if doesnt exists
+            if (!batFile.exists()) {
+                Files.writeString(batFile.toPath(), batContent, StandardCharsets.UTF_8);
+                log.info("📝 Created startup script for Windows: start.cmd");
+            }
+
+            if (!shFile.exists()) {
+                Files.writeString(shFile.toPath(), shContent, StandardCharsets.UTF_8);
+
+                // set executable (chmod +x) for the .sh file on Linux and MacOS
+                if (shFile.setExecutable(true, false)) {
+                    log.info("📝 Created executable startup script for Linux/Mac: start.sh");
+                } else {
+                    log.info("📝 Created startup script for Linux/Mac: start.sh (Please run 'chmod +x start.sh' manually)");
+                }
+            }
+        } catch (IOException e) {
+            log.error("⚠️ Failed to generate startup scripts!", e);
+        }
     }
 }

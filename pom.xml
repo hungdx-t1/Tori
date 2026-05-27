@@ -18,11 +18,12 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <revision>26.5.123</revision>
+    <revision>26.5.161</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
 
+    <!-- https://mvnrepository.com/artifact/club.minnced/jdave-api -->
     <jdave.version>0.1.8</jdave.version>
   </properties>
 
@@ -31,7 +32,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>6.0.3</version>
+      <version>6.1.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

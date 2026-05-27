@@ -14,6 +14,15 @@ console:
   #   and FATAL messages. Recommended for live production environments.
   debug: false
 
+  # Controls the stack trace sanitizer, which automatically filters out noisy and
+  # redundant internal packages from error logs (e.g., 'java.util.concurrent',
+  # 'java.lang.Thread', and framework-level executions).
+  #
+  # - true (Recommended): Cleans up stack traces for better readability by hiding
+  #   these background processes. Focuses the error log on your actual bot code.
+  # - false: Prints the raw, unfiltered stack trace.
+  enable-suppressing-some-package-on-stack-trace: true
+
 # ------------------------------------------------------------------------------
 # JDA (Java Discord API) Default Configuration
 # These are the default settings applied to every bot instance running

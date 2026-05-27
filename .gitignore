@@ -35,3 +35,6 @@ build/
 ### Mac OS ###
 .DS_Store
 .flattened-pom.xml
+
+### Tori Server ###
+/tori-server/logs

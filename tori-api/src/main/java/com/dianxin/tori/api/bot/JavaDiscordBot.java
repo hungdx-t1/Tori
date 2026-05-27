@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.RateLimitedException;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -175,7 +176,12 @@ public abstract class JavaDiscordBot {
 //                        return;
 //                    }
 
-                    logger.error("❌ Unhandled RestAction exception occurred:", th);
+                    logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
+                } else if (th instanceof RateLimitedException rateLimitedException) {
+                    double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
+                    logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
+                } else {
+                    logger.error("❌ Unhandled exception occurred in RestAction:", th);
                 }
             });
 

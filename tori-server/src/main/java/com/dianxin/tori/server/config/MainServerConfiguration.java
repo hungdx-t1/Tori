@@ -34,4 +34,9 @@ public class MainServerConfiguration implements ServerConfiguration {
     public boolean isDebug() {
         return configuration.getBoolean("console.debug", false);
     }
+
+    @Override
+    public boolean isSuppressingSomePackageOnStackTraceEnabled() {
+        return configuration.getBoolean("console.enable-suppressing-some-package-on-stack-trace", true);
+    }
 }

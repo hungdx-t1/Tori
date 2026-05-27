@@ -7,6 +7,7 @@ import com.dianxin.core.api.v2.scheduler.SchedulerImpl;
 import com.dianxin.tori.api.ToriServer;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
+import com.dianxin.tori.api.utils.ExceptionUtils;
 import com.dianxin.tori.server.bot.BotLoader;
 import com.dianxin.tori.server.commands.console.*;
 import com.dianxin.tori.server.config.MainServerConfiguration;
@@ -45,6 +46,10 @@ public class Server implements ToriServer {
         this.scheduler = new SchedulerImpl();
         this.botLoader = new BotLoader();
         this.hasJDave = false; // Default to false, will be checked in Main
+
+        if(serverConfiguration.isSuppressingSomePackageOnStackTraceEnabled()) {
+            var exceptionUtils = ExceptionUtils.getInstance(); // just use constructor.
+        }
     }
 
     /**
@@ -126,6 +131,8 @@ public class Server implements ToriServer {
         this.consoleCommandManager.register(new EnableBotConsoleCommand());
         this.consoleCommandManager.register(new DisableBotConsoleCommand());
         this.consoleCommandManager.register(new DebugConsoleCommand());
+        this.consoleCommandManager.register(new RestartConsoleCommand());
+        this.consoleCommandManager.register(new GcConsoleCommand());
 
         this.consoleCommandManager.startListening();
     }

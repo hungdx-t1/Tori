@@ -23,6 +23,7 @@ The project follows a standard Maven multi-module architecture:
 ```text
 tori/
 ├── tori-api/       # The API layer. Exposes interfaces, records, and the ToriProvider.
+├── tori-extension-dave/  # The Dave music extension.
 └── tori-server/    # The Core engine. Handles JDA, BotLoader, Scheduler, and Logging.
 ```
 ---
