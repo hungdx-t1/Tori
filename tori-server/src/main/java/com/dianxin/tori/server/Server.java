@@ -66,26 +66,28 @@ public class Server implements ToriServer {
 
         if(serverConfiguration.isGracefulLogOnUnknownInteractionError()) {
             RestAction.setDefaultFailure(th -> {
-                if (th instanceof ErrorResponseException errorResponseException) {
-                    if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
-                        logger.warn("⚠️ Interaction expired or already acknowledged (Code 10062). Ignore this warning.");
-                        return; // prevent print stack trace
-                    }
+                switch (th) {
+                    case ErrorResponseException errorResponseException -> {
+                        if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
+                            logger.warn("⚠️ Interaction expired or already acknowledged (Code 10062). Ignore this warning.");
+                            return; // prevent print stack trace
+                        }
 
-                    // Can catch any other exception code 50013: Missing Permissions
+                        // Can catch any other exception code 50013: Missing Permissions
 //.                    if (errorResponseException.getErrorResponse() == ErrorResponse.MISSING_PERMISSIONS) {
 //                        logger.warn("⚠️ Bot is missing permissions to perform a RestAction.");
 //                        return;
 //                    }
 
-                    logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
-                } else if (th instanceof RateLimitedException rateLimitedException) {
-                    double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
-                    logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
-                } else if (th instanceof InteractionFailureException) {
-                    logger.warn("⚠️ Interaction callback failed (Hook expired or Discord network issue). Action cancelled.");
-                } else {
-                    logger.error("❌ Unhandled exception occurred in RestAction:", th);
+                        logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
+                    }
+                    case RateLimitedException rateLimitedException -> {
+                        double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
+                        logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
+                    }
+                    case InteractionFailureException interactionFailureException ->
+                            logger.warn("⚠️ Interaction callback failed (Hook expired or Discord network issue). Action cancelled.");
+                    case null, default -> logger.error("❌ Unhandled exception occurred in RestAction:", th);
                 }
             });
 
