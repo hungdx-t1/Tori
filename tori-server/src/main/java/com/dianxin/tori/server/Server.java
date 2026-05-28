@@ -4,7 +4,6 @@ import com.dianxin.core.api.console.commands.ConsoleCommandManager;
 import com.dianxin.core.api.lifecycle.ExecutorManager;
 import com.dianxin.core.api.v2.scheduler.Scheduler;
 import com.dianxin.core.api.v2.scheduler.SchedulerImpl;
-import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.ToriServer;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
@@ -13,6 +12,7 @@ import com.dianxin.tori.server.bot.BotLoader;
 import com.dianxin.tori.server.commands.console.*;
 import com.dianxin.tori.server.config.MainServerConfiguration;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InteractionFailureException;
 import net.dv8tion.jda.api.exceptions.RateLimitedException;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -60,11 +60,11 @@ public class Server implements ToriServer {
             var exceptionUtils = ExceptionUtils.getInstance(); // just use constructor.
         }
 
-        if(ToriProvider.getConfig().isIgnoreErrorsOnRestAction()) {
+        if(serverConfiguration.isIgnoreErrorsOnRestAction()) {
             RestAction.setPassContext(true);
         }
 
-        if(ToriProvider.getConfig().isGracefulLogOnUnknownInteractionError()) {
+        if(serverConfiguration.isGracefulLogOnUnknownInteractionError()) {
             RestAction.setDefaultFailure(th -> {
                 if (th instanceof ErrorResponseException errorResponseException) {
                     if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
@@ -82,6 +82,8 @@ public class Server implements ToriServer {
                 } else if (th instanceof RateLimitedException rateLimitedException) {
                     double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
                     logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
+                } else if (th instanceof InteractionFailureException) {
+                    logger.warn("⚠️ Interaction callback failed (Hook expired or Discord network issue). Action cancelled.");
                 } else {
                     logger.error("❌ Unhandled exception occurred in RestAction:", th);
                 }
