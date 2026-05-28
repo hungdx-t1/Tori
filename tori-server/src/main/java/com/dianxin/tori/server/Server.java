@@ -4,6 +4,7 @@ import com.dianxin.core.api.console.commands.ConsoleCommandManager;
 import com.dianxin.core.api.lifecycle.ExecutorManager;
 import com.dianxin.core.api.v2.scheduler.Scheduler;
 import com.dianxin.core.api.v2.scheduler.SchedulerImpl;
+import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.ToriServer;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
@@ -11,6 +12,10 @@ import com.dianxin.tori.api.utils.ExceptionUtils;
 import com.dianxin.tori.server.bot.BotLoader;
 import com.dianxin.tori.server.commands.console.*;
 import com.dianxin.tori.server.config.MainServerConfiguration;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.RateLimitedException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +52,42 @@ public class Server implements ToriServer {
         this.botLoader = new BotLoader();
         this.hasJDave = false; // Default to false, will be checked in Main
 
+        this.setupFunctionsViaConfigs();
+    }
+
+    private void setupFunctionsViaConfigs() {
         if(serverConfiguration.isSuppressingSomePackageOnStackTraceEnabled()) {
             var exceptionUtils = ExceptionUtils.getInstance(); // just use constructor.
+        }
+
+        if(ToriProvider.getConfig().isIgnoreErrorsOnRestAction()) {
+            RestAction.setPassContext(true);
+        }
+
+        if(ToriProvider.getConfig().isGracefulLogOnUnknownInteractionError()) {
+            RestAction.setDefaultFailure(th -> {
+                if (th instanceof ErrorResponseException errorResponseException) {
+                    if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
+                        logger.warn("⚠️ Interaction expired or already acknowledged (Code 10062). Ignore this warning.");
+                        return; // prevent print stack trace
+                    }
+
+                    // Can catch any other exception code 50013: Missing Permissions
+//.                    if (errorResponseException.getErrorResponse() == ErrorResponse.MISSING_PERMISSIONS) {
+//                        logger.warn("⚠️ Bot is missing permissions to perform a RestAction.");
+//                        return;
+//                    }
+
+                    logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
+                } else if (th instanceof RateLimitedException rateLimitedException) {
+                    double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
+                    logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
+                } else {
+                    logger.error("❌ Unhandled exception occurred in RestAction:", th);
+                }
+            });
+
+            logger.info("✅ Global Exception Handler has been registered!");
         }
     }
 

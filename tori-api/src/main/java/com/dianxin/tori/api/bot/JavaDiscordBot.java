@@ -1,7 +1,6 @@
 package com.dianxin.tori.api.bot;
 
 import com.dianxin.core.api.console.commands.ConsoleCommandManager;
-import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.controller.VersionController;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -10,11 +9,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import net.dv8tion.jda.api.exceptions.RateLimitedException;
-import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -22,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.EnumSet;
-
 
 /**
  * Represents a base class for creating Discord bots using JDA with an extended
@@ -70,7 +64,7 @@ import java.util.EnumSet;
  * }
  * }</pre>
  */
-@SuppressWarnings({"unused", "EmptyMethod", "SameReturnValue", "CommentedOutCode"})
+@SuppressWarnings({"unused", "EmptyMethod", "SameReturnValue"})
 public abstract class JavaDiscordBot {
     private JDA jda;
     private IBotMeta meta;
@@ -157,36 +151,6 @@ public abstract class JavaDiscordBot {
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build()
                 .awaitReady();
-
-        if(ToriProvider.getConfig().isIgnoreErrorsOnRestAction()) {
-            RestAction.setPassContext(true);
-        }
-
-        if(ToriProvider.getConfig().isGracefulLogOnUnknownInteractionError()) {
-            RestAction.setDefaultFailure(th -> {
-                if (th instanceof ErrorResponseException errorResponseException) {
-                    if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
-                        logger.warn("⚠️ Interaction expired or already acknowledged (Code 10062). Ignore this warning.");
-                        return; // prevent print stack trace
-                    }
-
-                    // Can catch any other exception code 50013: Missing Permissions
-//                    if (errorResponseException.getErrorResponse() == ErrorResponse.MISSING_PERMISSIONS) {
-//                        logger.warn("⚠️ Bot is missing permissions to perform a RestAction.");
-//                        return;
-//                    }
-
-                    logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
-                } else if (th instanceof RateLimitedException rateLimitedException) {
-                    double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
-                    logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
-                } else {
-                    logger.error("❌ Unhandled exception occurred in RestAction:", th);
-                }
-            });
-
-            logger.info("✅ Global Exception Handler has been registered!");
-        }
 
         logger.info("Bot {} initialize successfully.", meta.botName());
         logger.info("Link invite bot: {}", jda.getInviteUrl());
