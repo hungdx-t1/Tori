@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -73,6 +74,11 @@ public class Server implements ToriServer {
                             return; // prevent print stack trace
                         }
 
+                        if (errorResponseException.getCause() != null && errorResponseException.getCause() instanceof SocketTimeoutException) {
+                            logger.error("⛓️‍💥 Socket timeout occurred during RestAction execution. This may indicate a network issue or Discord API instability. Consider implementing retry logic for better resilience.", th);
+                            return;
+                        }
+
                         // Can catch any other exception code 50013: Missing Permissions
 //.                    if (errorResponseException.getErrorResponse() == ErrorResponse.MISSING_PERMISSIONS) {
 //                        logger.warn("⚠️ Bot is missing permissions to perform a RestAction.");
@@ -87,6 +93,8 @@ public class Server implements ToriServer {
                     }
                     case InteractionFailureException interactionFailureException ->
                             logger.warn("⚠️ Interaction callback failed (Hook expired or Discord network issue). Action cancelled.");
+
+
                     case null, default -> logger.error("❌ Unhandled exception occurred in RestAction:", th);
                 }
             });
