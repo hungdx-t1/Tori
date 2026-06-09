@@ -9,6 +9,7 @@
 
   <modules>
     <module>tori-api</module>
+    <module>tori-base</module>
     <module>tori-server</module>
     <module>tori-extension-dave</module>
   </modules>
