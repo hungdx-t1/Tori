@@ -1,6 +1,6 @@
 package com.dianxin.tori.api.controller;
 
-import com.dianxin.core.api.utils.VersionManager;
+import com.dianxin.tori.base.utils.VersionManager;
 import com.dianxin.tori.api.base.Constants;
 import net.dv8tion.jda.api.JDAInfo;
 

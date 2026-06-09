@@ -1,8 +1,8 @@
 package com.dianxin.tori.server.config;
 
-import com.dianxin.core.api.config.yaml.FileConfiguration;
-import com.dianxin.core.api.config.yaml.YamlConfiguration;
 import com.dianxin.tori.api.config.ServerConfiguration;
+import com.dianxin.tori.base.configuration.yaml.FileConfiguration;
+import com.dianxin.tori.base.configuration.yaml.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;

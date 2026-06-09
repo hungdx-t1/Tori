@@ -1,6 +1,6 @@
 package com.dianxin.tori.api.bot;
 
-import com.dianxin.core.api.console.commands.ConsoleCommandManager;
+import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
 import com.dianxin.tori.api.controller.VersionController;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -155,9 +155,6 @@ public abstract class JavaDiscordBot {
         logger.info("Bot {} initialize successfully.", meta.botName());
         logger.info("Link invite bot: {}", jda.getInviteUrl());
 
-        // Register custom console commands
-        registerConsoleCommands();
-
         onEnable();
 
         long elapsedMillis = System.currentTimeMillis() - startTime;
@@ -230,6 +227,7 @@ public abstract class JavaDiscordBot {
     /**
      * Override this to register custom console commands using {@link ConsoleCommandManager}.
      */
+    @Deprecated
     protected void registerConsoleCommands() {
         // Bot subclasses override
     }
