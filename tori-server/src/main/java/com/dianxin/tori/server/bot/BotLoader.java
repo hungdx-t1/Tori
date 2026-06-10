@@ -3,6 +3,7 @@ package com.dianxin.tori.server.bot;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.bot.IBotMeta;
 import com.dianxin.tori.api.bot.JavaDiscordBot;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -104,10 +105,20 @@ public class BotLoader implements IBotLoader {
                 contributors.addAll(Arrays.asList(str.split(",\\s*")));
             }
 
-            String mainClassPath = String.valueOf(config.get("main"));
+            @Nullable Object mainClassPathSection = config.get("main");
+            if(mainClassPathSection == null) {
+                throw new NoSuchFileException("Main class path field ('main') is not specified");
+            }
+            String mainClassPath = String.valueOf(mainClassPathSection);
 
-            String botWebsite = String.valueOf(config.get("website"));
-            String ownerId = String.valueOf(config.get("ownerId"));
+            @Nullable Object botWebsiteSection = config.get("website");
+            String botWebsite = String.valueOf(botWebsiteSection);
+
+            @Nullable Object ownerIdSection = config.get("ownerId");
+            if(ownerIdSection == null) {
+                throw new IllegalStateException("Owner ID field ('ownerId') is not specified");
+            }
+            String ownerId = String.valueOf(ownerIdSection);
 
             if(botName == null) {
                 throw new IllegalStateException("Name field ('name') is not specified");
@@ -119,10 +130,6 @@ public class BotLoader implements IBotLoader {
 
             if(mainClassPath == null) {
                 throw new IllegalStateException("Main class path field ('main') is not specified");
-            }
-
-            if(ownerId == null) {
-                throw new IllegalStateException("Owner ID field ('ownerId') is not specified");
             }
 
             return new BotMeta(
