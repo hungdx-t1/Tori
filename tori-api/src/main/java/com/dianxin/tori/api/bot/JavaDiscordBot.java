@@ -187,8 +187,12 @@ public abstract class JavaDiscordBot {
     public void onShutdown() {
         onDisable();
         logger.info("⏹ Shutting down bot {}...", meta.botName());
-        jda.getPresence().setStatus(OnlineStatus.OFFLINE);
-        jda.shutdown();
+
+        // 26.6.101 patch: prevent NullPointerException on shutdown when bot has an error when loading
+        if(jda != null) {
+            jda.getPresence().setStatus(OnlineStatus.OFFLINE);
+            jda.shutdown();
+        }
     }
 
     public File getDataFolder() {
