@@ -1,6 +1,6 @@
 package com.dianxin.tori.base.scheduler;
 
-import com.dianxin.core.api.lifecycle.ExecutorManager;
+import com.dianxin.tori.base.lifecycle.ExecutorManager;
 
 import java.util.Map;
 import java.util.concurrent.*;
