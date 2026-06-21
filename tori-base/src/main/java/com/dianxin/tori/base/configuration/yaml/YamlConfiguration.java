@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.configuration.yaml;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -7,6 +8,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+// todo
+@ApiStatus.Experimental
 @SuppressWarnings({"unused", "ResultOfMethodCallIgnored"})
 public class YamlConfiguration implements FileConfiguration {
 

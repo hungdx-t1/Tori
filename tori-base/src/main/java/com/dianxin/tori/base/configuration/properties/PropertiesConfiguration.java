@@ -1,5 +1,7 @@
 package com.dianxin.tori.base.configuration.properties;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.io.File;
 
 /**
@@ -43,6 +45,8 @@ import java.io.File;
  * }
  * </code></pre>
  */
+// todo
+@ApiStatus.Experimental
 @SuppressWarnings("unused")
 public class PropertiesConfiguration {
 

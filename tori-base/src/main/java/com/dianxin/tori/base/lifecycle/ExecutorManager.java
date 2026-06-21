@@ -11,15 +11,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
- * Quản lý tập trung các {@link ExecutorService} (Thread Pool) cho toàn bộ framework.
+ * Centralized manager handling core {@link ExecutorService} (Thread Pools) across the framework.
  * <p>
- * Class này cung cấp hai loại executor chính:
+ * This manager segments execution environments into two distinct runtime channels:
  * <ul>
- * <li><b>IO Executor:</b> Dành cho các tác vụ blocking, chờ đợi mạng, ổ đĩa (Database, HTTP Requests, File I/O).</li>
- * <li><b>CPU Executor:</b> Dành cho các tác vụ tính toán nặng, xử lý logic phức tạp không blocking.</li>
+ * <li><b>IO Executor:</b> Reserved for blocking operations waiting on external factors like networking or disk speeds (e.g., Database pools, HTTP Requests, File I/O).</li>
+ * <li><b>CPU Executor:</b> Tailored for compute-heavy, complex application logic execution that runs without thread blocking.</li>
  * </ul>
  * <p>
- * Class này Thread-safe và chỉ nên được khởi tạo một lần duy nhất thông qua {@link #initialize()}.
+ * This utility class is entirely thread-safe and should be initialized exactly once during application bootstrap via {@link #initialize()}.
  */
 @SuppressWarnings({"ClassCanBeRecord", "unused"})
 public final class ExecutorManager {
@@ -30,10 +30,10 @@ public final class ExecutorManager {
     private ExecutorManager() { }
 
     /**
-     * Khởi tạo toàn bộ executor cho framework.
+     * Initializes default managed thread pool setups for the framework ecosystem.
      * <p>
-     * Phương thức này chỉ chạy một lần duy nhất. Nếu gọi lần thứ hai sẽ không có tác dụng.
-     * Nên được gọi trong giai đoạn bootstrap (khởi động) của ứng dụng.
+     * This execution block executes atomically once. Subsequent configuration attempts
+     * are completely ignored. Call this during the bootstrap sequence of your application.
      */
     public static void initialize() {
         if (INITIALIZED.compareAndSet(false, true)) {
@@ -43,7 +43,13 @@ public final class ExecutorManager {
         }
     }
 
-    // phương thức mới, overload cái cũ
+    /**
+     * Overloaded initialization method to pass custom external {@link ExecutorService} instances.
+     * Useful for specialized server configuration hooks or automated unit testing parameters.
+     *
+     * @param io  the custom I/O bounded task executor service
+     * @param cpu the custom CPU bounded task executor service
+     */
     public static void initialize(ExecutorService io, ExecutorService cpu) {
         if (INITIALIZED.compareAndSet(false, true)) {
             ExecutorBuilder builder = new ExecutorBuilder(io, cpu);
@@ -53,12 +59,13 @@ public final class ExecutorManager {
     }
 
     /**
-     * Lấy {@link ExecutorService} dành cho các tác vụ I/O (Input/Output).
+     * Gets the {@link ExecutorService} designated for Input/Output (I/O) bound operations.
      * <p>
-     * Pool này thường có số lượng thread lớn (hoặc cached) để xử lý nhiều tác vụ chờ đợi đồng thời.
+     * This pool scales or holds a higher volume of open connections to seamlessly process multiple
+     * concurrently blocking network or thread-wait requests.
      *
-     * @return ExecutorService cho I/O tasks.
-     * @throws IllegalStateException Nếu {@link #initialize()} chưa được gọi trước đó.
+     * @return the I/O specialized ExecutorService instance
+     * @throws IllegalStateException if {@link #initialize()} hasn't been explicitly triggered beforehand
      */
     public static ExecutorService io() {
         ensureInitialized();
@@ -66,12 +73,13 @@ public final class ExecutorManager {
     }
 
     /**
-     * Lấy {@link ExecutorService} dành cho các tác vụ tính toán (CPU-bound).
+     * Gets the {@link ExecutorService} designated for heavy data processing or CPU-bound tasks.
      * <p>
-     * Pool này có số lượng thread giới hạn (thường bằng số nhân CPU) để tối ưu hóa context switching.
+     * Thread counts in this pool are strategically bounded by hardware resources (usually
+     * matching physical core capacities) to minimize context-switching overhead penalty.
      *
-     * @return ExecutorService cho CPU tasks.
-     * @throws IllegalStateException Nếu {@link #initialize()} chưa được gọi trước đó.
+     * @return the calculation intensive ExecutorService instance
+     * @throws IllegalStateException if {@link #initialize()} hasn't been explicitly triggered beforehand
      */
     public static ExecutorService cpu() {
         ensureInitialized();
@@ -79,9 +87,10 @@ public final class ExecutorManager {
     }
 
     /**
-     * Tắt (Shutdown) toàn bộ các executor đang chạy.
+     * Gracefully shuts down all managed running framework executor pools.
      * <p>
-     * Nên gọi phương thức này khi bot hoặc ứng dụng dừng hoạt động để giải phóng tài nguyên thread.
+     * Invoke this method during application/bot teardown lifecycles to guarantee proper
+     * cleanup of underlying thread resources.
      */
     public static void shutdown() {
         if (!INITIALIZED.get()) return;
@@ -94,6 +103,9 @@ public final class ExecutorManager {
         }
     }
 
+    /**
+     * Assures initialization lifecycle requirements are completed prior to usage.
+     */
     private static void ensureInitialized() {
         if (!INITIALIZED.get()) {
             throw new IllegalStateException(
@@ -103,31 +115,30 @@ public final class ExecutorManager {
     }
 
     /**
-     * Chạy một tác vụ bất đồng bộ (Async) sử dụng {@link #io()} executor.
+     * Executes an asynchronous background task on the managed {@link #io()} executor pool.
      *
-     * @param supplier Logic cần thực thi trả về kết quả kiểu T.
-     * @param <T> Kiểu dữ liệu trả về.
-     * @return CompletableFuture chứa kết quả của tác vụ.
+     * @param supplier the functional logic task wrapper returning a computation result of type T
+     * @param <T>      the type of data returned by the execution block
+     * @return a {@link CompletableFuture} tracking the pending execution context status
      */
     public static <T> CompletableFuture<T> runIoAsync(@NotNull Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, io());
     }
 
     /**
-     * Chạy một tác vụ bất đồng bộ (Async) sử dụng {@link #cpu()} executor.
+     * Executes an asynchronous background task on the managed {@link #cpu()} executor pool.
      *
-     * @param supplier Logic cần thực thi trả về kết quả kiểu T.
-     * @param <T> Kiểu dữ liệu trả về.
-     * @return CompletableFuture chứa kết quả của tác vụ.
+     * @param supplier the functional logic task wrapper returning a computation result of type T
+     * @param <T>      the type of data returned by the execution block
+     * @return a {@link CompletableFuture} tracking the pending execution context status
      */
     public static <T> CompletableFuture<T> runCpuAsync(@NotNull Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, cpu());
     }
 
     /**
-     * Helper class để xây dựng và cấu hình các {@link ExecutorService}.
-     * <p>
-     * Class này đóng vai trò thay thế cho {@code ExecutorFactory} cũ.
+     * Inner helper class responsible for building and configuring managed {@link ExecutorService} units.
+     * Acts as an upgrade path replacing the previous legacy {@code ExecutorFactory}.
      */
     @NullMarked
     private static class ExecutorBuilder {
@@ -135,7 +146,7 @@ public final class ExecutorManager {
         private final ExecutorService cpu;
 
         /**
-         * Khởi tạo Builder với cấu hình mặc định dựa trên thông số phần cứng.
+         * Instantiates the builder using optimal standard defaults evaluated by native hardware metrics.
          */
         public ExecutorBuilder() {
             this.io = createDefaultIoExecutor();
@@ -143,10 +154,10 @@ public final class ExecutorManager {
         }
 
         /**
-         * Khởi tạo Builder với các ExecutorService tùy chỉnh (dùng cho Unit Test hoặc cấu hình đặc biệt).
+         * Instantiates the builder pointing towards explicit user customized configurations.
          *
-         * @param io  ExecutorService cho I/O.
-         * @param cpu ExecutorService cho CPU.
+         * @param io  the custom I/O executor target instance
+         * @param cpu the custom CPU executor target instance
          */
         public ExecutorBuilder(ExecutorService io, ExecutorService cpu) {
             this.io = io;
@@ -162,11 +173,11 @@ public final class ExecutorManager {
         }
 
         /**
-         * Tạo ThreadPool mặc định cho I/O:
+         * Creates a standard fixed thread pool configuration engineered for I/O operations:
          * <ul>
-         * <li>Số thread: max(4, Core * 2)</li>
-         * <li>Tên thread: dianxin-io-[id]</li>
-         * <li>Daemon: true (tự động tắt khi main thread tắt)</li>
+         * <li>Thread Allocation size: max(4, Core Count * 2)</li>
+         * <li>Thread naming schema: dianxin-io-[id]</li>
+         * <li>Daemon property: true (automatically terminates when the main execution thread exits)</li>
          * </ul>
          */
         private ExecutorService createDefaultIoExecutor() {
@@ -183,11 +194,11 @@ public final class ExecutorManager {
         }
 
         /**
-         * Tạo ThreadPool mặc định cho CPU:
+         * Creates a default thread pool specialized for high CPU usage:
          * <ul>
-         * <li>Số thread: Bằng số nhân CPU thực tế</li>
-         * <li>Tên thread: dianxin-cpu-[id]</li>
-         * <li>Daemon: true</li>
+         * <li>Thread Allocation size: Exactly matching available logical processor cores</li>
+         * <li>Thread naming schema: dianxin-cpu-[id]</li>
+         * <li>Daemon property: true</li>
          * </ul>
          */
         private ExecutorService createDefaultCpuExecutor() {

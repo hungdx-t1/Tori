@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.configuration.properties;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// todo
+@ApiStatus.Experimental
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class EmbeddedPropertiesConfigurationImpl implements EmbeddedPropertiesConfiguration {
 

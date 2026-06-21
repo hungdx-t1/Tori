@@ -16,24 +16,24 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Json5Configuration hỗ trợ đọc và lưu config JSON5,
- * đồng thời có thể reload lại config khi runtime.
+ * A generic configuration manager that supports reading, saving,
+ * and hot-reloading JSON5 configuration files at runtime.
  *
- * @param <T> Kiểu config cụ thể, phải kế thừa AbstractBotConfiguration
+ * @param <T> The concrete configuration type, which must extend {@link AbstractJsonConfiguration}
  */
 @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
-public class Json5GenericConfiguration<T extends AbstractBotConfiguration> {
+public class Json5GenericConfiguration<T extends AbstractJsonConfiguration> {
     private final Logger logger = LoggerFactory.getLogger(Json5GenericConfiguration.class);
 
-    // Đối tượng Jackson tĩnh dùng chung để tối ưu hiệu suất
+    // Shared static ObjectMapper instance for performance optimization
     private static final ObjectMapper MAPPER = JsonMapper.builder()
-            .enable(JsonReadFeature.ALLOW_JAVA_COMMENTS)       // Cho phép // và /* */
-            .enable(JsonReadFeature.ALLOW_YAML_COMMENTS)       // Cho phép # comment
-            .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES) // Cho phép key không có ""
-            .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)       // Cho phép dùng nháy đơn ''
-            // BẠN MUỐN BÁO LỖI HAY BỎ QUA DẤU PHẨY DƯ?
-            // .enable(JsonReadFeature.ALLOW_TRAILING_COMMA)   // Mở dòng này nếu muốn Jackson TỰ BỎ QUA dấu phẩy dư
-            .enable(SerializationFeature.INDENT_OUTPUT)        // Lưu file sẽ tự xuống dòng, thụt lề cho đẹp
+            .enable(JsonReadFeature.ALLOW_JAVA_COMMENTS)           // Allows standard Java comments (// and /* */)
+            .enable(JsonReadFeature.ALLOW_YAML_COMMENTS)           // Allows YAML-style comments (#)
+            .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES) // Allows unquoted property keys
+            .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)           // Allows single quotes ('') for strings
+            // Note: Uncomment the line below if you want Jackson to automatically tolerate trailing commas
+            // .enable(JsonReadFeature.ALLOW_TRAILING_COMMA)
+            .enable(SerializationFeature.INDENT_OUTPUT)            // Pretty-prints the output with indentation when saving
             .build();
 
     private T botConfig;
@@ -42,12 +42,13 @@ public class Json5GenericConfiguration<T extends AbstractBotConfiguration> {
     private final Class<T> clazz;
 
     /**
-     * Tạo config JSON5, nếu file chưa tồn tại sẽ copy từ resource mặc định.
+     * Initializes the JSON5 configuration manager.
+     * If the target configuration file does not exist, it will be copied from the specified default resource.
      *
-     * @param defaultResource Resource mặc định trong jar (vd: "config.json5")
-     * @param filePath        Đường dẫn file config trên server
-     * @param clazz           Class<T> của config cụ thể
-     * @throws IOException nếu có lỗi đọc ghi
+     * @param defaultResource The fallback resource path inside the JAR (e.g., "config.json5")
+     * @param filePath        The target file path on the server filesystem
+     * @param clazz           The {@code Class<T>} token of the concrete configuration
+     * @throws IOException    If an I/O error occurs during reading or writing
      */
     public Json5GenericConfiguration(String defaultResource, String filePath, Class<T> clazz) throws IOException {
         this.defaultResource = defaultResource;
@@ -55,48 +56,54 @@ public class Json5GenericConfiguration<T extends AbstractBotConfiguration> {
         this.clazz = clazz;
 
         ensureFileExists();
-        reloadConfig(); // Load lần đầu
+        reloadConfig();// Initial load
     }
 
-    /** Đảm bảo file config tồn tại, copy từ resource nếu cần */
+    /** * Ensures that the configuration file exists on disk,
+     * extracting it from the application resources if missing.
+     */
     private void ensureFileExists() throws IOException {
         if (configFile.exists()) return;
 
-        // Copy từ resource
+        // Extract from resources
         try (InputStream in = clazz.getClassLoader().getResourceAsStream(defaultResource)) {
             if (in == null) {
-                throw new NoSuchFileException("Không tìm thấy default config: " + defaultResource);
+                throw new NoSuchFileException("Default configuration resource not found: " + defaultResource);
             }
 
-            // Nếu file nằm ở root project (không có parent), skip mkdirs
+            // If the file is located in the root project directory (has no parent), skip directory creation
             File parent = configFile.getParentFile();
             if (parent != null) parent.mkdirs();
 
             Files.copy(in, configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            logger.info("✅ File config mặc định đã được tạo: {}", configFile.getAbsolutePath());
+            logger.info("✅ Default configuration file successfully created: {}", configFile.getAbsolutePath());
         }
     }
 
-    /** Reload config từ file JSON5 */
+    /**
+     * Reloads the configuration instance directly from the JSON5 file.
+     */
     public void reloadConfig() {
         try {
             this.botConfig = MAPPER.readValue(configFile, clazz);
-            logger.info("✅ Config JSON5 đã được reload thành công từ '{}'", configFile.getAbsolutePath());
+            logger.info("✅ JSON5 configuration successfully reloaded from '{}'", configFile.getAbsolutePath());
         } catch (JacksonException e) {
-            // BẮT LỖI CÚ PHÁP TẠI ĐÂY (Nó sẽ in ra đúng dòng và cột bị lỗi)
-            logger.error("❌ LỖI CÚ PHÁP JSON TRONG FILE '{}'\nChi tiết: {}", configFile.getName(), e.getMessage());
+            // Catch syntax errors explicitly (Jackson prints the exact line and column where the error occurred)
+            logger.error("❌ JSON SYNTAX ERROR IN FILE '{}'\nDetails: {}", configFile.getName(), e.getMessage());
         } catch (Exception e) {
-            logger.error("❌ Lỗi hệ thống khi đọc file config '{}'", configFile.getAbsolutePath(), e);
+            logger.error("❌ System error occurred while reading configuration file '{}'", configFile.getAbsolutePath(), e);
         }
     }
 
-    /** Lưu config hiện tại ra file JSON5 */
+    /**
+     * Saves the current configuration instance state back to the JSON5 file.
+     */
     public void saveConfig() {
         try {
             MAPPER.writeValue(configFile, botConfig);
-            logger.info("✅ Config JSON5 đã được lưu thành công vào '{}'", configFile.getAbsolutePath());
+            logger.info("✅ JSON5 configuration successfully saved to '{}'", configFile.getAbsolutePath());
         } catch (Exception e) {
-            logger.error("❌ Lỗi khi lưu config JSON5 vào '{}'", configFile.getAbsolutePath(), e);
+            logger.error("❌ Error occurred while saving JSON5 configuration to '{}'", configFile.getAbsolutePath(), e);
         }
     }
 
