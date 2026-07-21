@@ -1,6 +1,6 @@
 package com.dianxin.tori.api.config;
 
-import com.dianxin.core.api.config.yaml.FileConfiguration;
+import com.dianxin.tori.base.configuration.yaml.FileConfiguration;
 import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.ApiStatus;

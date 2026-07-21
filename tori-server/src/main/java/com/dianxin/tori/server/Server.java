@@ -1,22 +1,28 @@
 package com.dianxin.tori.server;
 
-import com.dianxin.core.api.console.commands.ConsoleCommandManager;
-import com.dianxin.core.api.lifecycle.ExecutorManager;
-import com.dianxin.core.api.v2.scheduler.Scheduler;
-import com.dianxin.core.api.v2.scheduler.SchedulerImpl;
 import com.dianxin.tori.api.ToriServer;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.utils.ExceptionUtils;
+import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
+import com.dianxin.tori.base.lifecycle.ExecutorManager;
+import com.dianxin.tori.base.scheduler.Scheduler;
+import com.dianxin.tori.base.scheduler.SchedulerImpl;
 import com.dianxin.tori.server.bot.BotLoader;
 import com.dianxin.tori.server.commands.console.*;
 import com.dianxin.tori.server.config.MainServerConfiguration;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InteractionFailureException;
+import net.dv8tion.jda.api.exceptions.RateLimitedException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -47,8 +53,53 @@ public class Server implements ToriServer {
         this.botLoader = new BotLoader();
         this.hasJDave = false; // Default to false, will be checked in Main
 
+        this.setupFunctionsViaConfigs();
+    }
+
+    private void setupFunctionsViaConfigs() {
         if(serverConfiguration.isSuppressingSomePackageOnStackTraceEnabled()) {
             var exceptionUtils = ExceptionUtils.getInstance(); // just use constructor.
+        }
+
+        if(serverConfiguration.isIgnoreErrorsOnRestAction()) {
+            RestAction.setPassContext(true);
+        }
+
+        if(serverConfiguration.isGracefulLogOnUnknownInteractionError()) {
+            RestAction.setDefaultFailure(th -> {
+                switch (th) {
+                    case ErrorResponseException errorResponseException -> {
+                        if (errorResponseException.getErrorResponse() == ErrorResponse.UNKNOWN_INTERACTION) {
+                            logger.warn("⚠️ Interaction expired or already acknowledged (Code 10062). Ignore this warning.");
+                            return; // prevent print stack trace
+                        }
+
+                        if (errorResponseException.getCause() != null && errorResponseException.getCause() instanceof SocketTimeoutException) {
+                            logger.error("⛓️‍💥 Socket timeout occurred during RestAction execution. This may indicate a network issue or Discord API instability. Consider implementing retry logic for better resilience.", th);
+                            return;
+                        }
+
+                        // Can catch any other exception code 50013: Missing Permissions
+//.                    if (errorResponseException.getErrorResponse() == ErrorResponse.MISSING_PERMISSIONS) {
+//                        logger.warn("⚠️ Bot is missing permissions to perform a RestAction.");
+//                        return;
+//                    }
+
+                        logger.error("❌ Unhandled ErrorResponse RestAction exception occurred:", th);
+                    }
+                    case RateLimitedException rateLimitedException -> {
+                        double seconds = (double) rateLimitedException.getRetryAfter() / 1000;
+                        logger.error("❌ Rate limited on RestAction. Retry after {}s", seconds, th);
+                    }
+                    case InteractionFailureException interactionFailureException ->
+                            logger.warn("⚠️ Interaction callback failed (Hook expired or Discord network issue). Action cancelled.");
+
+
+                    case null, default -> logger.error("❌ Unhandled exception occurred in RestAction:", th);
+                }
+            });
+
+            logger.info("✅ Global Exception Handler has been registered!");
         }
     }
 

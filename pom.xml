@@ -9,6 +9,7 @@
 
   <modules>
     <module>tori-api</module>
+    <module>tori-base</module>
     <module>tori-server</module>
     <module>tori-extension-dave</module>
   </modules>
@@ -18,7 +19,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <revision>26.5.161</revision>
+    <revision>26.6.101</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -32,7 +33,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>6.1.0</version>
+      <version>6.1.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

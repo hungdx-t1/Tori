@@ -3,7 +3,8 @@ package com.dianxin.tori.api.utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -101,13 +102,54 @@ public class ExceptionUtils {
 
         // Filter the current error's StackTrace
         StackTraceElement[] originalTrace = throwable.getStackTrace();
-        StackTraceElement[] cleanedTrace = Arrays.stream(originalTrace)
-                .filter(element -> suppressedPackages.stream()
-                        .noneMatch(pkg -> element.getClassName().startsWith(pkg)))
-                .toArray(StackTraceElement[]::new);
+
+        List<StackTraceElement> cleanedTraceList = new ArrayList<>();
+        int suppressedCount = 0;
+        for (StackTraceElement element : originalTrace) {
+            boolean isSuppressed = false;
+            for (String pkg : suppressedPackages) {
+                if (element.getClassName().startsWith(pkg)) {
+                    isSuppressed = true;
+                    break;
+                }
+            }
+
+            if (isSuppressed) {
+                suppressedCount++;
+            } else {
+                // When writing a line that is NOT hidden, check to see if there was a hidden line before it.
+                if (suppressedCount > 0) {
+                    // Insert a Dummy Element to print out the message
+                    cleanedTraceList.add(new StackTraceElement(
+                            "... suppressed " + suppressedCount + " lines",
+                            "hidden",
+                            null,
+                            -1
+                    ));
+                    suppressedCount = 0; // Reset counter
+                }
+                cleanedTraceList.add(element);
+            }
+        }
+
+        // Handle the case where hidden lines are at the end of the StackTrace
+        if (suppressedCount > 0) {
+            cleanedTraceList.add(new StackTraceElement(
+                    "... suppressed " + suppressedCount + " lines",
+                    "",
+                    "",
+                    -1
+            ));
+        }
+
+// --- old 26.5.161 ---
+//        StackTraceElement[] cleanedTrace = Arrays.stream(originalTrace)
+//                .filter(element -> suppressedPackages.stream()
+//                        .noneMatch(pkg -> element.getClassName().startsWith(pkg)))
+//                .toArray(StackTraceElement[]::new);
 
         // Overwrite the filtered StackTrace
-        throwable.setStackTrace(cleanedTrace);
+        throwable.setStackTrace(cleanedTraceList.toArray(new StackTraceElement[0]));
 
         // Recursion to always clean up the original errors (Caused by)
         if (throwable.getCause() != null) {

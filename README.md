@@ -89,6 +89,22 @@ In your bot's `pom.xml`, include `tori-api` with the `provided` scope:
     </dependencies>
 ```
 
+Or with Gradle, open build.gradle with dependencies: 
+
+```
+repositories {
+    mavenCentral()
+    maven { url '[https://jitpack.io](https://jitpack.io)' }
+}
+
+dependencies {
+    def toriVersion = '{latest_version}'
+    
+    compileOnly "com.github.hungdx-t1.Tori:tori-api:toriVersion"
+    compileOnly "com.github.hungdx-t1.Tori:tori-extension-dave:toriVersion"
+}
+```
+
 **Step 2: Create the Bot Main Class**
    
 Extend the `JavaDiscordBot` abstract class:
