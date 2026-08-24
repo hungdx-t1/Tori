@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>com.dianxin.tori</groupId>
+            <artifactId>tori-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dianxin.tori</groupId>
             <artifactId>tori-api</artifactId>
             <version>${project.version}</version>
         </dependency>
