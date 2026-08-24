@@ -37,19 +37,6 @@
             <version>6.5.0</version>
         </dependency>
 
-        <!-- v26.6.101-SNAPSHOT: removed DianxinCore - the deprecated libs -->
-<!--        <dependency>-->
-<!--            <groupId>com.github.hungdx-t1.DianxinCore2</groupId>-->
-<!--            <artifactId>dianxin-api</artifactId>-->
-<!--            <version>2.4</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.github.hungdx-t1.DianxinCore2</groupId>-->
-<!--            <artifactId>dianxin-simple-logger-pack</artifactId>-->
-<!--            <version>2.4</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>com.dianxin.tori</groupId>
             <artifactId>tori-base</artifactId>
