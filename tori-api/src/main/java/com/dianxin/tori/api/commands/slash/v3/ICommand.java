@@ -14,7 +14,7 @@ public interface ICommand {
             throw new IllegalStateException("Missing @SlashInfo on " + this.getClass().getSimpleName());
         }
         SlashCommandData data = Commands.slash(info.name(), info.description());
-        data.setGuildOnly(info.guildOnly());
+//        data.setGuildOnly(info.guildOnly());
         configure(data);
         return data;
     }

@@ -43,7 +43,7 @@ public abstract class BaseCommand {
     /** Tạo đối tượng Slash Command tương thích với JDA */
     public SlashCommandData buildSlashData() {
         SlashCommandData data = Commands.slash(this.name, this.description);
-        data.setGuildOnly(this.guildOnly);
+        //data.setGuildOnly(this.guildOnly);
         return data;
     }
 

@@ -18,7 +18,7 @@ public class CommandManager extends ListenerAdapter {
 
     public CommandManager() {
         // Mặc định đăng ký security middleware
-        registerMiddleware(new SecurityMiddleware());
+//        registerMiddleware(new SecurityMiddleware());
     }
 
     public void registerCommand(ICommand... cmds) {

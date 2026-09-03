@@ -20,8 +20,8 @@ public class CommandListener extends ListenerAdapter {
         BaseCommand cmd = registry.getCommand(event.getName());
         if (cmd == null) return;
 
-        ICommandContext ctx = new SlashCommandContext(event);
-        handleExecution(cmd, ctx);
+       // ICommandContext ctx = new SlashCommandContext(event);
+        //handleExecution(cmd, ctx);
     }
 
     @Override
@@ -37,8 +37,8 @@ public class CommandListener extends ListenerAdapter {
         if (cmd == null) return;
 
         String args = parts.length > 1 ? parts[1] : "";
-        ICommandContext ctx = new TextCommandContext(event, args);
-        handleExecution(cmd, ctx);
+       // ICommandContext ctx = new TextCommandContext(event, args);
+      //  handleExecution(cmd, ctx);
     }
 
     private void handleExecution(BaseCommand cmd, ICommandContext ctx) {
