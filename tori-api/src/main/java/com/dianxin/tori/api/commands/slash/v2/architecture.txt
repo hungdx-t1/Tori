@@ -1,0 +1,51 @@
+(soạn bởi AI)
+
+Dưới đây là một bản thiết kế Command API Framework dạng Context-Based kết hợp Dual-Registry
+(Slash Command + Text Prefix), được may đo chuẩn cho kiến trúc Modular Bot (như framework Tori của bạn).
+
+Kiến trúc tổng quan (Architecture Overview)
+
+[Discord Event: Slash / Text]
+             │
+             ▼
+   [CommandEventDispatcher] (Lắng nghe JDA Event)
+             │
+   ┌─────────┴─────────┐
+   ▼                   ▼
+[SlashContext]     [TextContext] ──► Implement [ICommandContext]
+   │                   │
+   └─────────┬─────────┘
+             ▼
+      [Pipeline / Guard] ──► (Kiểm tra Cooldown, GuildOnly, Permissions)
+             │
+             ▼
+     [AbstractCommand] ────► execute(ICommandContext ctx)
+
+1. Unified Context (ICommandContext.java)
+Tạo một abstraction chung để code xử lý nghiệp vụ không cần quan tâm tin nhắn đến
+từ Slash Command hay Chat thường:
+
+2. Base Command (BaseCommand.java)
+Định nghĩa metadata của command, tự động sinh SlashCommandData cho JDA và chứa logic thực thi chính:
+
+3. Bộ quản lý đăng ký & điều phối (CommandRegistry.java)
+Quản lý danh sách lệnh, ánh xạ alias và đăng ký tập trung vào JDA:
+
+4. Dispatcher Pipeline (CommandListener.java)
+Đón các event từ Discord, bọc vào Context, lọc Guard/Middleware và gọi lệnh:
+
+5. Cách triển khai một lệnh cụ thể (Clean & Ngắn gọn)
+public class PingCommand extends BaseCommand {
+
+    public PingCommand() {
+        super("ping", "Kiểm tra độ trễ của Bot");
+        addAliases("p", "latency");
+        setGuildOnly(true);
+    }
+
+    @Override
+    public void execute(ICommandContext ctx) {
+        long gatewayPing = ctx.getJDA().getGatewayPing();
+        ctx.reply("🏓 Pong! Gateway latency: `" + gatewayPing + "ms`");
+    }
+}

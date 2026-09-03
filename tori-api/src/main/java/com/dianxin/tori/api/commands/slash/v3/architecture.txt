@@ -1,0 +1,105 @@
+(soạn bởi AI)
+Dưới đây là thiết kế một Command API Framework nhẹ, hiện đại cho JDA theo phong cách declarative (Annotation + Context Object + Pipeline Interceptor), rất phù hợp với kiến trúc bot dạng module của bạn.
+
+Kiến trúc tổng quan
+Command Container: Lớp cơ sở trừu tượng (BaseSlashCommand) hoặc Interface kết hợp @SlashInfo.
+
+Command Context: Đóng gói SlashCommandInteractionEvent, tự động parse Option an toàn và xử lý nhanh deferReply().
+
+Middlewares / Interceptors: Pipeline kiểm tra quyền hạn, Cooldown, Guild-only trước khi vào hàm thực thi chính.
+
+Auto-Discovery & Registry: Quét package hoặc đăng ký thủ công, tự động build CommandData và đồng bộ (upsert) lên Discord.
+
+1. Annotation định nghĩa metadata lệnh (SlashInfo)
+
+2. Context Wrapper: SlashContext
+Đóng gói các tương tác thường dùng và hỗ trợ method chaining tiện lợi
+
+3. Interface lệnh cơ sở: ICommand
+Cho phép vừa khai báo metadata qua annotation, vừa linh hoạt thêm OptionData hoặc Subcommand:
+
+4. Middleware / Interceptor Pipeline
+Xử lý tiền điều kiện (Cooldown, Permissions, Guild check) trước khi lệnh được gọi:
+
+Ví dụ Cooldown & Permission Middleware:
+package com.dianxin.tori.framework.command.middleware;
+
+import com.dianxin.tori.framework.command.ICommand;
+import com.dianxin.tori.framework.command.annotation.SlashInfo;
+import com.dianxin.tori.framework.command.context.SlashContext;
+import net.dv8tion.jda.api.Permission;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class SecurityMiddleware implements CommandMiddleware {
+    private final Map<String, Long> cooldowns = new ConcurrentHashMap<>();
+
+    @Override
+    public boolean handle(SlashContext ctx, ICommand command) {
+        SlashInfo info = command.getClass().getAnnotation(SlashInfo.class);
+        if (info == null) return true;
+
+        // 1. Kiểm tra Permission
+        if (info.requiredPermissions().length > 0 && ctx.getMember() != null) {
+            for (Permission perm : info.requiredPermissions()) {
+                if (!ctx.getMember().hasPermission(perm)) {
+                    ctx.reply("🚫 Bạn không có quyền `" + perm.getName() + "` để dùng lệnh này!");
+                    return false;
+                }
+            }
+        }
+
+        // 2. Kiểm tra Cooldown
+        if (info.cooldownSeconds() > 0) {
+            String key = ctx.getUser().getId() + ":" + info.name();
+            long now = System.currentTimeMillis();
+            long expireAt = cooldowns.getOrDefault(key, 0L);
+
+            if (now < expireAt) {
+                long remaining = (expireAt - now) / 1000;
+                ctx.reply("⏳ Vui lòng chờ `" + remaining + "s` trước khi tiếp tục dùng lệnh.");
+                return false;
+            }
+            cooldowns.put(key, now + (info.cooldownSeconds() * 1000));
+        }
+
+        return true;
+    }
+}
+
+5. Bộ quản lý lệnh & Dispatcher: CommandManager
+
+
+6. Cách viết một lệnh với Framework mới
+Viết lại lệnh TTSFileCommand siêu ngắn gọn:
+package mino.dx.curseletcraft.xyrius.commands;
+
+import com.dianxin.tori.framework.command.ICommand;
+import com.dianxin.tori.framework.command.annotation.SlashInfo;
+import com.dianxin.tori.framework.command.context.SlashContext;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+
+@SlashInfo(
+    name = "ttsfile",
+    description = "Tạo file âm thanh MP3 từ văn bản",
+    cooldownSeconds = 5
+)
+public class TTSFileCommand implements ICommand {
+
+    @Override
+    public void configure(SlashCommandData data) {
+        data.addOptions(new OptionData(OptionType.STRING, "text", "Văn bản cần đọc", true));
+    }
+
+    @Override
+    public void execute(SlashContext ctx) {
+        String text = ctx.getString("text", "");
+
+        // Gọi TTS service và trả về file
+        byte[] audioData = "...".getBytes();
+        ctx.replyFile(audioData, "tts.mp3");
+    }
+}
