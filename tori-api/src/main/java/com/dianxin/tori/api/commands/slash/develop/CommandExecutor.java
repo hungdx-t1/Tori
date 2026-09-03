@@ -8,13 +8,47 @@ import java.lang.reflect.Method;
 
 public class CommandExecutor {
 
-    public static void execute(Class<?> cmdClass, SlashCommandInteractionEvent event) {
-        try {
-            // 1. Tạo instance mới cho mỗi lần gọi (tránh thread-safety issue)
-            Object instance = cmdClass.getDeclaredConstructor().newInstance();
+    public static void execute(Class<?> rootClass, SlashCommandInteractionEvent event) {
+        String subName = event.getSubcommandName();
+        String groupName = event.getSubcommandGroup();
 
-            // 2. Inject dữ liệu từ SlashCommandInteractionEvent vào các Field
-            for (Field field : cmdClass.getDeclaredFields()) {
+        Class<?> targetClass = rootClass;
+
+        // Nếu lệnh có Subcommand, tìm đúng Inner Class tương ứng
+        if (subName != null) {
+            targetClass = findSubcommandClass(rootClass, groupName, subName);
+            if (targetClass == null) {
+                event.reply("❌ Không tìm thấy bộ xử lý cho subcommand: " + subName).setEphemeral(true).queue();
+                return;
+            }
+        }
+
+        dispatch(targetClass, event);
+    }
+
+    private static Class<?> findSubcommandClass(Class<?> root, String group, String sub) {
+        for (Class<?> inner : root.getDeclaredClasses()) {
+            if (group != null && inner.isAnnotationPresent(SubcommandGroup.class)) {
+                SubcommandGroup g = inner.getAnnotation(SubcommandGroup.class);
+                if (g.name().equalsIgnoreCase(group)) {
+                    return findSubcommandClass(inner, null, sub);
+                }
+            } else if (inner.isAnnotationPresent(Subcommand.class)) {
+                Subcommand s = inner.getAnnotation(Subcommand.class);
+                if (s.name().equalsIgnoreCase(sub)) {
+                    return inner;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void dispatch(Class<?> targetClass, SlashCommandInteractionEvent event) {
+        try {
+            Object instance = targetClass.getDeclaredConstructor().newInstance();
+
+            // Inject các Field từ Option
+            for (Field field : targetClass.getDeclaredFields()) {
                 CommandOption opt = field.getAnnotation(CommandOption.class);
                 if (opt == null) continue;
 
@@ -22,36 +56,31 @@ public class CommandExecutor {
                 if (mapping == null) continue;
 
                 field.setAccessible(true);
-                Object val = extractValue(field.getType(), mapping);
-                if (val != null) {
-                    field.set(instance, val);
-                }
+                field.set(instance, extractValue(field.getType(), mapping));
             }
 
-            // 3. Tìm method có @Execute để chạy
-            for (Method method : cmdClass.getDeclaredMethods()) {
+            // Thực thi method @Execute
+            for (Method method : targetClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Execute.class)) {
-                    Execute execConfig = method.getAnnotation(Execute.class);
-                    if (execConfig.defer()) {
-                        event.deferReply(execConfig.ephemeral()).queue();
+                    Execute config = method.getAnnotation(Execute.class);
+                    if (config.defer() && !event.isAcknowledged()) {
+                        event.deferReply(config.ephemeral()).queue();
                     }
 
                     method.setAccessible(true);
-                    // Hỗ trợ method có nhận tham số event hoặc không
                     if (method.getParameterCount() == 1 && method.getParameterTypes()[0].isAssignableFrom(SlashCommandInteractionEvent.class)) {
                         method.invoke(instance, event);
-                    } else if (method.getParameterCount() == 0) {
+                    } else {
                         method.invoke(instance);
                     }
                     return;
                 }
             }
         } catch (Exception e) {
-            event.getHook().sendMessage("❌ Lỗi thực thi lệnh: " + e.getMessage()).queue();
+            event.getHook().sendMessage("❌ Lỗi thực thi subcommand: " + e.getMessage()).queue();
         }
     }
 
-    /** Tự map kiểu dữ liệu của Field sang JDA OptionMapping */
     private static Object extractValue(Class<?> targetType, OptionMapping mapping) {
         if (targetType == String.class) return mapping.getAsString();
         if (targetType == Long.class || targetType == long.class) return mapping.getAsLong();
