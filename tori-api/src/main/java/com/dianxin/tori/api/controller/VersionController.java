@@ -29,7 +29,7 @@ public final class VersionController {
         if (javaVersion < JAVA_REQUIRED_VERSION) {
             throw new UnsupportedOperationException(
                     "Java version is incompatible, must use Java " + JAVA_REQUIRED_VERSION +
-                            "or higher instead " + javaVersion + "!"
+                            " or higher instead " + javaVersion + "!"
             );
         }
     }
