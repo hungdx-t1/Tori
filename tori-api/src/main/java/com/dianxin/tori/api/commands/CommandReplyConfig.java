@@ -1,12 +1,14 @@
 package com.dianxin.tori.api.commands;
 
 import net.dv8tion.jda.api.Permission;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Configuration interface for customizing the rejection messages sent by the command registrar.
  * Implementing this interface allows developers to support multiple languages (i18n)
  * or custom bot personas without modifying the core logic.
  */
+@NullMarked
 @SuppressWarnings({"unused", "SameReturnValue"})
 public interface CommandReplyConfig {
 

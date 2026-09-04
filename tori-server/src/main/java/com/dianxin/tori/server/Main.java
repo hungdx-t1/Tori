@@ -4,24 +4,40 @@ import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
+import com.dianxin.tori.server.gui.ToriServerGui;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.Arrays;
 
 public class Main {
     public static final Instant BOOT_TIME = Instant.now(); // save when press start
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private static Server server;
+    private static ToriServerGui gui;
 
     public static void main(String[] args) {
+        // Check if GUI should be enabled (skip if headless or if 'nogui' argument is passed)
+        boolean nogui = Arrays.asList(args).contains("nogui") || GraphicsEnvironment.isHeadless();
+
+        if (!nogui) {
+            try {
+                gui = new ToriServerGui();
+                gui.setVisible(true);
+            } catch (Exception e) {
+                log.warn("Failed to initialize server GUI, falling back to console mode: {}", e.getMessage());
+            }
+        }
+
         System.setProperty("terminal.jline", "true");
         System.setProperty("org.jline.terminal.dumb", "true");
         System.setProperty("terminal.ansi", "true");
@@ -116,7 +132,12 @@ public class Main {
                 }
             }
         });
-        Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown, "Tori-Shutdown-Thread"));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (gui != null) {
+                gui.dispose();
+            }
+            server.shutdown();
+        }, "Tori-Shutdown-Thread"));
 
         log.info("Generating startup scripts...");
         generateStartupScripts();

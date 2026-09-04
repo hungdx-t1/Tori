@@ -1,12 +1,14 @@
 package com.dianxin.tori.api.commands;
 
 import net.dv8tion.jda.api.Permission;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * The default English implementation of {@link CommandReplyConfig}.
  * Provides standard, readable error messages for all command validation failures.
  */
 @SuppressWarnings("unused")
+@NullMarked
 public class DefaultEnglishReplyConfig implements CommandReplyConfig {
     @Override
     public String getOwnerOnlyMessage() { return "❌ Only the bot owner can use this command."; }

@@ -34,6 +34,14 @@
             <version>0.10.2</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/com.formdev/flatlaf -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.7.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

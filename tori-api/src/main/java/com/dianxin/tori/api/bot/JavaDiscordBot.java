@@ -1,7 +1,9 @@
 package com.dianxin.tori.api.bot;
 
+import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
 import com.dianxin.tori.api.controller.VersionController;
+import com.dianxin.tori.base.scheduler.Scheduler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -265,7 +267,13 @@ public abstract class JavaDiscordBot {
     /**
      * Logger instance for this bot class.
      */
+    @NotNull
     protected Logger getLogger() {
         return logger;
+    }
+
+    @NotNull
+    public final Scheduler getScheduler() {
+        return ToriProvider.getScheduler();
     }
 }
