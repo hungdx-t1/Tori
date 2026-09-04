@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.lang.reflect.Field;
 
-public class CommandDataBuilder {
+class CommandDataBuilder {
 
     public static SlashCommandData build(Class<?> rootClass) {
         Command cmd = rootClass.getAnnotation(Command.class);
