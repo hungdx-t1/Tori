@@ -3,7 +3,17 @@ name: Build and Deploy Javadoc
 on:
   release:
     types: [published]
-  workflow_dispatch: # Allow clicking the 'Run workflow' button manually to test at any time
+  push:
+    branches:
+      - main
+      - master
+    # Only trigger when there is a code change related to tori-api or pom.xml
+    paths:
+      - 'tori-api/**'
+      - 'tori-base/**'
+      - 'pom.xml'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -24,33 +34,53 @@ jobs:
       - name: Build with Maven
         run: mvn clean package javadoc:jar -DskipTests
 
-      # Extract javadoc of tori-api and configure multi-version
+      # Handling logical branching: Snapshot vs Release
       - name: Prepare Javadoc Site Structure
         run: |
-          mkdir -p javadoc-site/Tori
+          mkdir -p javadoc-site
           
-          # get file javadoc jar of module tori-api
+          # search file javadoc jar of tori-api
           API_JAVADOC_JAR=$(find tori-api/target -name "*-javadoc.jar" | head -n 1)
           
           if [ -z "$API_JAVADOC_JAR" ]; then
-            echo "❌ Cannot found javadoc jar in tori-api/target!"
+            echo "❌ Cannot find javadoc jar in tori-api/target!"
             exit 1
           fi
           
           echo "Found javadoc artifact: $API_JAVADOC_JAR"
-          unzip -q "$API_JAVADOC_JAR" -d javadoc-site/Tori
 
-          # Get version from release tag (or revision variable if running manually)
-          VERSION="${{ github.ref_name }}"
-          if [ -z "$VERSION" ] || [ "$VERSION" = "main" ] || [ "$VERSION" = "master" ]; then
-            VERSION="26.8.301"
+          # Extract temporarily to a temp folder
+          mkdir -p tmp-docs
+          unzip -q "$API_JAVADOC_JAR" -d tmp-docs
+
+          # check event type activating workflow
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "📦 Processing Official Release deployment..."
+          
+            # update stable version (release) (/Tori)
+            mkdir -p javadoc-site/Tori
+            cp -r tmp-docs/* javadoc-site/Tori/
+          
+            # save as tag version (vd: /26.8.301)
+            VERSION="${{ github.ref_name }}"
+            mkdir -p "javadoc-site/$VERSION"
+            cp -r tmp-docs/* "javadoc-site/$VERSION/"
+          
+          else
+            echo "⚡ Processing Snapshot/Dev Push deployment..."
+          
+            # push to folder snapshot
+            mkdir -p javadoc-site/snapshot
+            cp -r tmp-docs/* javadoc-site/snapshot/
+          
+            # If there is no Tori folder (first deploy), create it temporarily to avoid 404
+            if [ ! -d "javadoc-site/Tori" ]; then
+              mkdir -p javadoc-site/Tori
+              cp -r tmp-docs/* javadoc-site/Tori/
+            fi
           fi
 
-          # Copy an additional folder version for parallel storage (vd: /26.8.301)
-          mkdir -p "javadoc-site/$VERSION"
-          cp -r javadoc-site/Tori/* "javadoc-site/$VERSION/"
-
-          # Create the original index.html file that navigates directly to /Tori
+          # 3. create file index.html
           cat << 'EOF' > javadoc-site/index.html
           <!DOCTYPE html>
           <html>
