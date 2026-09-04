@@ -36,7 +36,7 @@ public class CommandRegistrar extends ListenerAdapter {
                 continue;
             }
             registeredCommands.put(meta.name().toLowerCase(Locale.ROOT), clazz);
-            log.debug("Đã nạp Slash Command: /{}", meta.name());
+            log.debug("Slash Command /{} registered successfully.", meta.name());
         }
     }
 
@@ -45,7 +45,7 @@ public class CommandRegistrar extends ListenerAdapter {
      * - Nếu targetGuild != null: cập nhật cho riêng Guild đó (cập nhật tức thì, thích hợp debug).
      * - Nếu targetGuild == null: cập nhật toàn cầu (Global Commands).
      */
-    public void commitAllCommands(@Nullable Guild targetGuild) {
+    public void commitAllCommands(@Nullable Guild... targetGuilds) {
         List<SlashCommandData> payload = new ArrayList<>();
 
         for (Class<?> clazz : registeredCommands.values()) {
@@ -57,11 +57,16 @@ public class CommandRegistrar extends ListenerAdapter {
             }
         }
 
-        if (targetGuild != null) {
-            targetGuild.updateCommands().addCommands(payload).queue(
-                    success -> log.info("✅ Đã đồng bộ {} Slash Command cho Guild: {}", success.size(), targetGuild.getName()),
-                    error -> log.error("❌ Thất bại khi đồng bộ lệnh cho Guild: {}", targetGuild.getName(), error)
-            );
+        if (targetGuilds != null) {
+            List<Guild> guilds = Arrays.stream(targetGuilds).toList();
+            if (!guilds.isEmpty()) {
+                for (Guild guild : guilds) {
+                    guild.updateCommands().addCommands(payload).queue(
+                            success -> log.info("✅ Đã đồng bộ {} Slash Command cho Guild: {}", success.size(), guild.getName()),
+                            error -> log.error("❌ Thất bại khi đồng bộ lệnh cho Guild: {}", guild.getName(), error)
+                    );
+                }
+            }
         } else {
             bot.getJda().updateCommands().addCommands(payload).queue(
                     success -> log.info("✅ Đã đồng bộ {} Slash Command toàn cầu!", success.size()),
