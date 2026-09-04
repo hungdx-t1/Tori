@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CommandExecutor {
+    private CommandExecutor() {
+        throw new AssertionError();
+    }
 
     public static void execute(Class<?> rootClass, SlashCommandInteractionEvent event) {
         String subName = event.getSubcommandName();
