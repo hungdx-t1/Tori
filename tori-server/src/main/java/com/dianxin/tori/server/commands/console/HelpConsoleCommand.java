@@ -23,6 +23,7 @@ public class HelpConsoleCommand extends AbstractConsoleCommand {
         sb.append(" 🔹 disablebot - Gracefully stop and unload a bot: disablebot <bot_name>\n");
         sb.append(" 🔹 debug      - Provides debugging information about the system environment.\n");
         sb.append(" 🔹 gc         - Triggers a garbage collection cycle.\n");
+        sb.append(" 🔹 update     - Check for updates.\n");
         sb.append("========================================");
 
         getLogger().info(sb.toString());
