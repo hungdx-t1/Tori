@@ -4,10 +4,12 @@ on:
   push:
     branches: [ "**" ]
   pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
     branches: [ "**" ]
 
 jobs:
   build:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +28,7 @@ jobs:
       - name: Build Full DAVE version
         run: mvn -B package -P dave-build -DskipTests --file pom.xml
 
-      # Upload toàn bộ JAR (Lấy cả thư mục extension-dave luôn)
+      # upload all jar files (contains extension-dave)
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
