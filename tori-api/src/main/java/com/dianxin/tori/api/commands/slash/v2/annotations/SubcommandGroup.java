@@ -1,4 +1,4 @@
-package com.dianxin.tori.api.commands.slash.develop;
+package com.dianxin.tori.api.commands.slash.v2.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Subcommand {
+public @interface SubcommandGroup {
     String name();
     String description();
 }

@@ -1,6 +1,9 @@
-package com.dianxin.tori.api.commands.slash.production;
+package com.dianxin.tori.api.commands.slash.v2.example;
 
-import com.dianxin.tori.api.commands.slash.develop.*;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Command;
+import com.dianxin.tori.api.commands.slash.v2.annotations.CommandOption;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Execute;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Subcommand;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

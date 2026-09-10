@@ -1,6 +1,7 @@
-package com.dianxin.tori.api.commands.slash.develop;
+package com.dianxin.tori.api.commands.slash.v2.controller;
 
 import com.dianxin.tori.api.bot.JavaDiscordBot;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Command;
 import com.dianxin.tori.api.exceptions.MissingAnnotationException;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

@@ -1,5 +1,9 @@
-package com.dianxin.tori.api.commands.slash.develop;
+package com.dianxin.tori.api.commands.slash.v2.controller;
 
+import com.dianxin.tori.api.commands.slash.v2.annotations.CommandOption;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Execute;
+import com.dianxin.tori.api.commands.slash.v2.annotations.Subcommand;
+import com.dianxin.tori.api.commands.slash.v2.annotations.SubcommandGroup;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;

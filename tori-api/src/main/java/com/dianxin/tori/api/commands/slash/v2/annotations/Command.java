@@ -1,4 +1,4 @@
-package com.dianxin.tori.api.commands.slash.develop;
+package com.dianxin.tori.api.commands.slash.v2.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
