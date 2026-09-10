@@ -121,15 +121,29 @@ public class Server implements ToriServer {
         }
     }
 
-    public void shutdown() {
+    public synchronized void shutdown() {
         if (!isRunning) return;
         isRunning = false;
 
         logger.info("Stopping server...");
 
-        botLoader.shutdownAll();
-        ExecutorManager.shutdown();
-        scheduler.shutdown();
+        try {
+            if (botLoader != null) botLoader.shutdownAll();
+        } catch (Exception e) {
+            logger.error("Error while shutting down bots", e);
+        }
+
+        try {
+            ExecutorManager.shutdown();
+        } catch (Exception e) {
+            logger.error("Error while shutting down executors", e);
+        }
+
+        try {
+            if (scheduler != null) scheduler.shutdown();
+        } catch (Exception e) {
+            logger.error("Error while shutting down scheduler", e);
+        }
 
         logger.info("Done! Good bye!");
     }
