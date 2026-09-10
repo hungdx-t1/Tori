@@ -15,12 +15,15 @@
             </Policies>
             <DefaultRolloverStrategy max="30"/>
         </RollingRandomAccessFile>
+
+        <GuiLogAppender name="GuiAppender" />
     </Appenders>
 
     <Loggers>
         <Root level="info">
             <AppenderRef ref="TerminalConsole"/>
             <AppenderRef ref="File"/>
+            <AppenderRef ref="GuiAppender"/>
         </Root>
 
 <!--        <Logger name="com.dianxin.core" level="debug" additivity="false">-->

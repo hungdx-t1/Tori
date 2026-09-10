@@ -40,6 +40,34 @@ public class ConsoleCommandManager {
     }
 
     /**
+     * Dispatches and executes a command string directly.
+     * Can be invoked from CLI console thread, GUI inputs, or remote APIs.
+     *
+     * @param rawLine the full raw command string (e.g., "stop", "bots")
+     */
+    public void dispatch(String rawLine) {
+        if (rawLine == null) return;
+        String line = rawLine.trim();
+        if (line.isEmpty()) return;
+
+        String[] split = line.split("\\s+");
+        String name = split[0].toLowerCase(Locale.ROOT);
+        String[] args = Arrays.copyOfRange(split, 1, split.length);
+
+        AbstractConsoleCommand cmd = commands.get(name);
+
+        if (cmd != null) {
+            try {
+                cmd.execute(args);
+            } catch (Exception e) {
+                logger.error("An error occurred when trying to execute command '{}': {}", name, e.getMessage(), e);
+            }
+        } else {
+            logger.warn("Command '{}' not found. Type 'help' for available commands.", name);
+        }
+    }
+
+    /**
      * Initializes and starts a background thread that continuously reads inputs
      * from standard input (System.in) and routes them to their registered commands.
      */
