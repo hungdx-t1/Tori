@@ -3,53 +3,81 @@ package com.dianxin.tori.base.scheduler;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Trình quản lý tác vụ hẹn giờ hiện đại, tích hợp chặt chẽ với ExecutorManager.
- * Sử dụng 1 luồng duy nhất làm "Đồng hồ" để đếm ngược, sau đó phân phối
- * công việc thực tế cho CPU Pool hoặc IO Pool.
+ * Task scheduling management interface integrated with {@code ExecutorManager}.
+ *
+ * <p>Uses a single dedicated clock thread to count down time offsets and subsequently
+ * dispatches execution payloads to either the CPU thread pool or the I/O thread pool.</p>
  */
 @SuppressWarnings("unused")
 public interface Scheduler {
 
     /**
-     * Chạy một task ngay lập tức trên luồng xử lý chính (Pool).
+     * Executes a task immediately on the primary CPU-bound thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @return a tracked {@link Task} instance
      */
     Task runTask(Runnable runnable);
 
     /**
-     * Chạy một task bất đồng bộ trên luồng riêng biệt (dành cho IO nặng).
+     * Executes a task immediately on the asynchronous I/O-bound thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @return a tracked {@link Task} instance
      */
     Task runTaskAsync(Runnable runnable);
 
     /**
-     * Chạy task sau một khoảng thời gian (Delay).
-     * @param delay Thời gian chờ (tính bằng mili giây - tick = 50ms)
+     * Schedules a task to execute after a specified delay on the CPU thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @param delay    the time to wait before executing
+     * @param unit     the time unit of the delay parameter
+     * @return a tracked {@link Task} instance
      */
     Task runTaskLater(Runnable runnable, long delay, TimeUnit unit);
 
     /**
-     * Chạy task bất đồng bộ sau một khoảng thời gian.
+     * Schedules a task to execute asynchronously after a specified delay on the I/O thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @param delay    the time to wait before executing
+     * @param unit     the time unit of the delay parameter
+     * @return a tracked {@link Task} instance
      */
     Task runTaskLaterAsync(Runnable runnable, long delay, TimeUnit unit);
 
     /**
-     * Chạy task lặp đi lặp lại (Timer).
-     * @param delay Thời gian chờ trước khi bắt đầu
-     * @param period Chu kỳ lặp lại
+     * Schedules a repeated task to execute on the CPU thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @param delay    the time to wait before the first execution
+     * @param period   the interval between successive executions
+     * @param unit     the time unit of the delay and period parameters
+     * @return a tracked {@link Task} instance
      */
     Task runTaskTimer(Runnable runnable, long delay, long period, TimeUnit unit);
 
     /**
-     * Chạy task lặp lại bất đồng bộ.
+     * Schedules a repeated task to execute asynchronously on the I/O thread pool.
+     *
+     * @param runnable the task logic to execute
+     * @param delay    the time to wait before the first execution
+     * @param period   the interval between successive executions
+     * @param unit     the time unit of the delay and period parameters
+     * @return a tracked {@link Task} instance
      */
     Task runTaskTimerAsync(Runnable runnable, long delay, long period, TimeUnit unit);
 
     /**
-     * Hủy một task dựa trên ID.
+     * Cancels an active or scheduled task matching the unique task ID.
+     *
+     * @param taskId the unique identifier of the target task
      */
     void cancelTask(int taskId);
 
     /**
-     * Hủy tất cả task đang chạy (Dùng khi shutdown bot).
+     * Cancels all currently scheduled tasks and releases underlying thread pool resources.
      */
     void shutdown();
 }
