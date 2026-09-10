@@ -5,6 +5,7 @@ import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
 import com.dianxin.tori.server.gui.ToriServerGui;
+import com.dianxin.tori.server.updater.UpdateChecker;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
@@ -149,6 +150,11 @@ public class Main {
         log.info("Tori Server has been started in {} ms!", System.currentTimeMillis() - BOOT_TIME.toEpochMilli());
         log.info("Ready!");
         log.info("Using Tori server v{}", Constants.TORI_SERVER_VERSION);
+
+        UpdateChecker.checkForUpdateAsync().queue(
+                success -> {},
+                error -> log.error("Error while checking for updates.", error)
+        );
     }
 
     public static Server getServer() {
