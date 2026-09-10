@@ -198,6 +198,7 @@ public class Server implements ToriServer {
         this.consoleCommandManager.register(new DebugConsoleCommand());
         this.consoleCommandManager.register(new RestartConsoleCommand());
         this.consoleCommandManager.register(new GcConsoleCommand());
+        this.consoleCommandManager.register(new UpdateConsoleCommand());
 
         this.consoleCommandManager.startListening();
     }
