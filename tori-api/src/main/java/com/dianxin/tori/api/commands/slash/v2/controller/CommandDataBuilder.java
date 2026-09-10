@@ -11,11 +11,22 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.lang.reflect.Field;
 
-class CommandDataBuilder {
+/**
+ * Utility class responsible for parsing annotation-based command declarations
+ * and building JDA {@link SlashCommandData} models.
+ */
+class CommandDataBuilder { // package private class
     private CommandDataBuilder() {
         throw new AssertionError();
     }
 
+    /**
+     * Builds a {@link SlashCommandData} instance from a root class annotated with {@link Command}.
+     *
+     * @param rootClass the command class to introspect
+     * @return fully configured {@link SlashCommandData}
+     * @throws IllegalArgumentException if the provided class is missing the {@link Command} annotation
+     */
     public static SlashCommandData build(Class<?> rootClass) {
         Command cmd = rootClass.getAnnotation(Command.class);
         if (cmd == null) {
@@ -25,7 +36,7 @@ class CommandDataBuilder {
         SlashCommandData slashData = Commands.slash(cmd.name(), cmd.description());
         Class<?>[] declaredClasses = rootClass.getDeclaredClasses();
 
-        // TRƯỜNG HỢP 1: Lệnh có Subcommands / SubcommandGroups
+        // case 1 - Command contains Subcommands or SubcommandGroups
         if (declaredClasses.length > 0) {
             for (Class<?> subClass : declaredClasses) {
                 if (subClass.isAnnotationPresent(Subcommand.class)) {
@@ -35,7 +46,8 @@ class CommandDataBuilder {
                 }
             }
         }
-        // TRƯỜNG HỢP 2: Lệnh đơn thuần không có subcommands
+
+        // case 2 - Flat command without subcommands
         else {
             populateOptions(slashData, rootClass);
         }
@@ -43,6 +55,12 @@ class CommandDataBuilder {
         return slashData;
     }
 
+    /**
+     * Constructs a {@link SubcommandData} instance by scanning an annotated inner class.
+     *
+     * @param subClass the subcommand class
+     * @return configured {@link SubcommandData}
+     */
     private static SubcommandData buildSubcommandData(Class<?> subClass) {
         Subcommand sub = subClass.getAnnotation(Subcommand.class);
         SubcommandData subData = new SubcommandData(sub.name(), sub.description());
@@ -57,6 +75,12 @@ class CommandDataBuilder {
         return subData;
     }
 
+    /**
+     * Constructs a {@link SubcommandGroupData} instance by scanning an annotated inner class.
+     *
+     * @param groupClass the subcommand group class
+     * @return configured {@link SubcommandGroupData}
+     */
     private static SubcommandGroupData buildGroupData(Class<?> groupClass) {
         SubcommandGroup group = groupClass.getAnnotation(SubcommandGroup.class);
         SubcommandGroupData groupData = new SubcommandGroupData(group.name(), group.description());
@@ -69,6 +93,12 @@ class CommandDataBuilder {
         return groupData;
     }
 
+    /**
+     * Populates command options onto a top-level command.
+     *
+     * @param data  the slash command data to populate
+     * @param clazz the class containing annotated option fields
+     */
     private static void populateOptions(SlashCommandData data, Class<?> clazz) {
         for (Field field : clazz.getDeclaredFields()) {
             CommandOption opt = field.getAnnotation(CommandOption.class);
