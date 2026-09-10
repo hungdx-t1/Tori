@@ -1,5 +1,6 @@
 package com.dianxin.tori.server.gui;
 
+import com.dianxin.tori.server.Main;
 import com.formdev.flatlaf.FlatDarkLaf;
 import org.jspecify.annotations.NonNull;
 
@@ -11,12 +12,14 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class ToriServerGui extends JFrame {
+    private static ToriServerGui instance;
     private final JTextArea logArea;
     private final JTextField commandInput;
     private final JLabel memoryLabel;
 
     public ToriServerGui() {
         super("Tori Server Dashboard");
+        instance = this;
 
         // Initialize FlatLaf Dark Theme
         try {
@@ -74,9 +77,18 @@ public class ToriServerGui extends JFrame {
         commandInput.addActionListener(e -> {
             String cmd = commandInput.getText().trim();
             if (!cmd.isEmpty()) {
-                System.out.println("> " + cmd);
-                // TODO: send command to command dispatcher of Tori Server
                 commandInput.setText("");
+
+                // Push into a separate thread to avoid blocking the GUI if the command runs a long task
+                new Thread(() -> {
+                    try {
+                        if (Main.getServer() != null && Main.getServer().getConsoleCommandManager() != null) {
+                            Main.getServer().getConsoleCommandManager().dispatch(cmd);
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("Failed to dispatch command from GUI: " + ex.getMessage());
+                    }
+                }, "GUI-CommandDispatch-Thread").start();
             }
         });
 
@@ -88,6 +100,12 @@ public class ToriServerGui extends JFrame {
 
         // Start memory polling updater
         startMemoryUpdater();
+    }
+
+    public static void appendText(String text) {
+        if (instance != null && instance.logArea != null) {
+            SwingUtilities.invokeLater(() -> instance.logArea.append(text));
+        }
     }
 
     private void redirectSystemStreams() {

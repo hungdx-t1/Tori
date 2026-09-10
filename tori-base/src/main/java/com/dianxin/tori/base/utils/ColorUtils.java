@@ -1,89 +1,102 @@
 package com.dianxin.tori.base.utils;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.Color;
 import java.util.Random;
 
+/**
+ * Utility class for color operations, hex transformations, and randomized palettes.
+ */
 @SuppressWarnings("unused")
 public final class ColorUtils {
     private static final Random RANDOM = new Random();
 
-    private ColorUtils() { }
+    private ColorUtils() {
+        throw new AssertionError("Utility class cannot be instantiated.");
+    }
 
     /**
-     * Tạo một màu ngẫu nhiên hoàn toàn.
-     * @return Đối tượng Color ngẫu nhiên.
+     * Generates a completely randomized RGB {@link Color}.
+     *
+     * @return a random color instance
      */
+    @NotNull
     public static Color random() {
         return new Color(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256));
     }
 
     /**
-     * Tạo một chuỗi Hex ngẫu nhiên (VD: "#FFAABB").
-     * Lưu ý: Mình đổi return type thành String vì tên hàm là randomHex,
-     * nếu bạn muốn trả về Color thì dùng hàm random() ở trên nhé.
-     * @return Chuỗi Hex color.
+     * Generates a randomized uppercase Hex string representation (e.g., "#FFAABB").
+     *
+     * @return a 7-character hex color string
      */
+    @NotNull
     public static String randomHexString() {
         Color color = random();
         return toHexString(color);
     }
 
     /**
-     * Tạo một màu ngẫu nhiên nằm trong khoảng giữa 2 mã Hex.
-     * Rất hữu ích để tạo màu gradient hoặc random theo tông màu.
-     * * @param minHex Mã hex bắt đầu (VD: "#000000")
-     * @param maxHex Mã hex kết thúc (VD: "#101010")
-     * @return Color nằm trong khoảng màu đó.
+     * Generates a randomized color bounded between two hexadecimal thresholds per channel.
+     * Useful for constrained palettes and gradient stepping.
+     *
+     * @param minHex the starting hex string (e.g., "#000000" or "000000")
+     * @param maxHex the ending hex string (e.g., "#101010" or "101010")
+     * @return a randomized color bounded within the designated range
+     * @throws IllegalArgumentException if the hex string format or length is invalid
      */
-    public static Color randomColorRescricted(String minHex, String maxHex) {
-        // 1. Chuẩn hóa input (bỏ dấu # nếu có)
-        if (minHex.startsWith("#")) minHex = minHex.substring(1);
-        if (maxHex.startsWith("#")) maxHex = maxHex.substring(1);
+    @NotNull
+    public static Color randomColorRestricted(@NotNull String minHex, @NotNull String maxHex) {
+        String cleanMin = minHex.startsWith("#") ? minHex.substring(1) : minHex;
+        String cleanMax = maxHex.startsWith("#") ? maxHex.substring(1) : maxHex;
 
-        // 2. Validate độ dài
-        if (minHex.length() != 6 || maxHex.length() != 6) {
-            throw new IllegalArgumentException("Mã Hex phải bao gồm 6 ký tự (VD: FF0000)");
+        if (cleanMin.length() != 6 || cleanMax.length() != 6) {
+            throw new IllegalArgumentException("Hex color code must contain 6 hexadecimal characters. Found: min=" + minHex + ", max=" + maxHex);
         }
 
         try {
-            // 3. Tách các thành phần R, G, B từ chuỗi Hex
-            int minR = Integer.parseInt(minHex.substring(0, 2), 16);
-            int minG = Integer.parseInt(minHex.substring(2, 4), 16);
-            int minB = Integer.parseInt(minHex.substring(4, 6), 16);
+            int minR = Integer.parseInt(cleanMin.substring(0, 2), 16);
+            int minG = Integer.parseInt(cleanMin.substring(2, 4), 16);
+            int minB = Integer.parseInt(cleanMin.substring(4, 6), 16);
 
-            int maxR = Integer.parseInt(maxHex.substring(0, 2), 16);
-            int maxG = Integer.parseInt(maxHex.substring(2, 4), 16);
-            int maxB = Integer.parseInt(maxHex.substring(4, 6), 16);
+            int maxR = Integer.parseInt(cleanMax.substring(0, 2), 16);
+            int maxG = Integer.parseInt(cleanMax.substring(2, 4), 16);
+            int maxB = Integer.parseInt(cleanMax.substring(4, 6), 16);
 
-            // 4. Random từng thành phần trong khoảng min-max
-            // Sử dụng Math.min/max để đảm bảo không bị lỗi nếu người dùng truyền min > max
             int r = randomInRange(Math.min(minR, maxR), Math.max(minR, maxR));
             int g = randomInRange(Math.min(minG, maxG), Math.max(minG, maxG));
             int b = randomInRange(Math.min(minB, maxB), Math.max(minB, maxB));
 
             return new Color(r, g, b);
-
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Mã Hex chứa ký tự không hợp lệ", e);
+            throw new IllegalArgumentException("Hex string contains invalid characters.", e);
         }
     }
 
     /**
-     * Tiện ích: Chuyển đổi Color object sang chuỗi Hex (#RRGGBB).
+     * Converts a {@link Color} object into an uppercase Hex string (#RRGGBB).
+     *
+     * @param color the color to convert
+     * @return formatted hex color string
      */
-    public static String toHexString(Color color) {
-        return String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()).toUpperCase();
+    @NotNull
+    public static String toHexString(@NotNull Color color) {
+        return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
     }
 
     /**
-     * Chuyển đổi chuỗi Hex (VD: "#FF0000" hoặc "FF0000") sang Color.
-     * @param hexStr Chuỗi màu Hex.
-     * @return Đối tượng Color tương ứng.
-     * @throws IllegalArgumentException Nếu chuỗi null, rỗng hoặc sai định dạng.
+     * Parses a hexadecimal string into a {@link Color} object.
+     *
+     * @param hexStr the hex string (e.g., "#FF0000" or "FF0000")
+     * @return the resolved {@link Color}
+     * @throws IllegalArgumentException if the string is null, empty, or improperly formatted
      */
-    public static Color fromHex(String hexStr) {
+    @NotNull
+    public static Color fromHex(@Nullable String hexStr) {
         if (hexStr == null || hexStr.trim().isEmpty()) {
-            throw new IllegalArgumentException("Chuỗi Hex không được để trống");
+            throw new IllegalArgumentException("Hex color string cannot be null or empty.");
         }
 
         String cleanHex = hexStr.trim();
@@ -92,17 +105,16 @@ public final class ColorUtils {
         }
 
         if (cleanHex.length() != 6) {
-            throw new IllegalArgumentException("Mã Hex phải bao gồm 6 ký tự (VD: FF0000). Input: " + hexStr);
+            throw new IllegalArgumentException("Hex color code must contain 6 hexadecimal characters. Found: " + hexStr);
         }
 
         try {
             return new Color(Integer.parseInt(cleanHex, 16));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Chuỗi Hex chứa ký tự không hợp lệ: " + hexStr, e);
+            throw new IllegalArgumentException("Hex string contains non-hexadecimal characters: " + hexStr, e);
         }
     }
 
-    // --- Helper private ---
     private static int randomInRange(int min, int max) {
         if (min == max) return min;
         return RANDOM.nextInt((max - min) + 1) + min;

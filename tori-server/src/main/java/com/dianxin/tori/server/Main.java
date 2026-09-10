@@ -10,6 +10,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -134,7 +135,10 @@ public class Main {
         });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (gui != null) {
-                gui.dispose();
+                SwingUtilities.invokeLater(() -> {
+                    gui.setVisible(false);
+                    gui.dispose();
+                });
             }
             server.shutdown();
         }, "Tori-Shutdown-Thread"));
