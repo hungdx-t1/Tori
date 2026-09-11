@@ -72,8 +72,8 @@ public class UpdateChecker {
     }
 
     /**
-     * Kiểm tra và in log so sánh phiên bản (dùng khi startup hoặc chạy lệnh console).
-     * Sử dụng: UpdateChecker.checkForUpdateAsync().queue(success -> ..., failure -> ...);
+     * Check for update and print to console (use on startup or run console command).
+     * Usage: UpdateChecker.checkForUpdateAsync().queue(success -> ..., failure -> ...);
      */
     public static FutureAction<Void> checkForUpdateAsync() {
         return FutureAction.action(() -> {
