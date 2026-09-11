@@ -5,5 +5,6 @@ package com.dianxin.tori.base.configuration.json;
  * All concrete configuration classes must extend this class to be managed
  * by {@link Json5GenericConfiguration}.
  */
+@SuppressWarnings("unused")
 public abstract class AbstractJsonConfiguration {
 }

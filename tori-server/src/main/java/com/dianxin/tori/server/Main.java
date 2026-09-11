@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Arrays;
 
+@SuppressWarnings("TrailingWhitespacesInTextBlock")
 public class Main {
     public static final Instant BOOT_TIME = Instant.now(); // save when press start
     private static final Logger log = LoggerFactory.getLogger(Main.class);

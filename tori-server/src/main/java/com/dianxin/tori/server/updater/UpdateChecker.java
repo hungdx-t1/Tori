@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+@SuppressWarnings({"JavadocLinkAsPlainText", "LoggingSimilarMessage"})
 public class UpdateChecker {
     private static final Logger log = LoggerFactory.getLogger(UpdateChecker.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -25,24 +26,24 @@ public class UpdateChecker {
     /**
      * Get latest version tag from GitHub Releases.
      * Usage: UpdateChecker.checkLatestVersionAsync().queue(latestTag -> ..., ex -> ...);
-     *
+     * <p>
      * Example:
      * <code><pre>
      * UpdateChecker.checkLatestVersionAsync().queue(
      *     latestTag -> {
-     *             String current = Constants.TORI_SERVER_VERSION;
-     *             int cmp = UpdateChecker.compareVersions(current, latestTag);
+     *         String current = Constants.TORI_SERVER_VERSION;
+     *         int cmp = UpdateChecker.compareVersions(current, latestTag);
      *
-     *             if (cmp < 0) {
-     *                 sender.sendMessage("⚠️ New version found: " + latestTag + " (Current: " + current + ")");
-     *                 sender.sendMessage("🔗 https://github.com/hungdx-t1/Tori/releases/tag/" + latestTag);
-     *             } else if (cmp == 0) {
-     *                 sender.sendMessage("✅ Tori is up to date (" + current + ").");
-     *             } else {
-     *                 sender.sendMessage("🚀 Running a dev build (" + current + ") ahead of release (" + latestTag + ").");
-     *             }
-     *         },
-     *     error -> sender.sendMessage("❌ Failed to check for update: " + error.getMessage())
+     *         if (cmp < 0) {
+     *             sender.sendMessage("⚠️ New version found: " + latestTag + " (Current: " + current + ")");
+     *             sender.sendMessage("🔗 https://github.com/hungdx-t1/Tori/releases/tag/" + latestTag);
+     *         } else if (cmp == 0) {
+     *             sender.sendMessage("✅ Tori is up to date (" + current + ").");
+     *         } else {
+     *             sender.sendMessage("🚀 Running a dev build (" + current + ") ahead of release (" + latestTag + ").");
+     *         }
+     *     },
+     * error -> sender.sendMessage("❌ Failed to check for update: " + error.getMessage())
      * );
      * </pre></code>
      */
@@ -67,7 +68,7 @@ public class UpdateChecker {
             }
 
             JsonNode root = MAPPER.readTree(response.body());
-            return root.path("tag_name").asText().trim();
+            return root.path("tag_name").asString().trim();
         }, ExecutorManager.io());
     }
 
