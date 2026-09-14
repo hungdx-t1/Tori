@@ -13,7 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
  * <p>Usage: {@code /hello [member] [message]}</p>
  */
 @Command(name = "hello", description = "Send a greeting to yourself or another member.")
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "DefaultAnnotationParam"})
 public class ExampleCommand {
 
     @CommandOption(type = OptionType.USER, name = "member", description = "The member you want to greet", required = false)

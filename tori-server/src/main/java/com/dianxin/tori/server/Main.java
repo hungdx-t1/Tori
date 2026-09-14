@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Arrays;
 
+@SuppressWarnings("TrailingWhitespacesInTextBlock")
 public class Main {
     public static final Instant BOOT_TIME = Instant.now(); // save when press start
     private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -30,6 +31,17 @@ public class Main {
     public static void main(String[] args) {
         // Check if GUI should be enabled (skip if headless or if 'nogui' argument is passed)
         boolean nogui = Arrays.asList(args).contains("nogui") || GraphicsEnvironment.isHeadless();
+        if (nogui) {
+            System.setProperty("java.awt.headless", "true"); // force run as headless
+        }
+
+        System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("com.zaxxer.hikari.housekeeper.periodMs", "60000"); // todo - add, if available
+
+        // Reduce the number of redundant Netty worker threads if the container only has 1-2 vCPUs.
+        System.setProperty("io.netty.eventLoopThreads", String.valueOf(Math.max(2, Runtime.getRuntime().availableProcessors())));
+
+        checkAndWarnJvmFlags();
 
         if (!nogui) {
             try {
@@ -164,16 +176,31 @@ public class Main {
         return server;
     }
 
+    private static void checkAndWarnJvmFlags() {
+        java.lang.management.RuntimeMXBean runtimeMx = java.lang.management.ManagementFactory.getRuntimeMXBean();
+        java.util.List<String> jvmArgs = runtimeMx.getInputArguments();
+
+        boolean hasOptimizedGc = jvmArgs.stream().anyMatch(arg ->
+                arg.contains("UseG1GC") || arg.contains("UseZGC"));
+
+        if (!hasOptimizedGc) {
+            log.warn("⚠️ Server is running without optimized GC flags!");
+            log.warn("👉 For low-latency & hosting stability, launch with: java -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -jar server.jar");
+        }
+    }
+
     private static void generateStartupScripts() {
-        // start.cmd
         String batContent = """
                 @echo off
                 title Tori Server - Script
                 cls
                 
+                :: JVM Flags tối ưu cho Discord Bot: Giảm GC Pause time, tối ưu Heap và String
+                set JVM_FLAGS=-Xms128M -Xmx1024M -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:+UseStringDeduplication -XX:+OptimizeStringConcat
+                
                 :loop
-                echo [Tori Bootstrapper] Starting Tori Server...
-                java -jar server.jar
+                echo [Tori Bootstrapper] Starting Tori Server with JVM optimizations...
+                java %JVM_FLAGS% -jar server.jar
                 set EXIT_CODE=%ERRORLEVEL%
                 
                 echo.
@@ -192,17 +219,28 @@ public class Main {
                 pause
                 """;
 
-        // start.sh
         String shContent = """
                 #!/bin/bash
                 
                 # Clear terminal screen
                 clear
                 
+                # JVM Flags dành cho Linux Container / VPS
+                # - Dùng MaxRAMPercentage để tự co giãn theo giới hạn RAM của container mà không bị OOMKilled
+                # - Bật headless triệt để để không khởi tạo tài nguyên đồ họa Swing
+                # - G1GC với độ trễ cực thấp (20ms) giúp ngăn triệt để 'Thread starvation or clock leap'
+                JVM_FLAGS="-Xms128M -XX:MaxRAMPercentage=75.0 \
+                -XX:+UseG1GC \
+                -XX:MaxGCPauseMillis=20 \
+                -XX:+UseStringDeduplication \
+                -XX:+ExitOnOutOfMemoryError \
+                -Djava.awt.headless=true \
+                -Dfile.encoding=UTF-8"
+                
                 while true; do
-                    echo "[Tori Bootstrapper] Starting Tori Server..."
+                    echo "[Tori Bootstrapper] Starting Tori Server on Linux Container..."
                     
-                    java -jar server.jar
+                    java $JVM_FLAGS -jar server.jar nogui
                     EXIT_CODE=$?
                     
                     echo ""
@@ -225,7 +263,6 @@ public class Main {
         File shFile = new File("start.sh");
 
         try {
-            // only create file if doesnt exists
             if (!batFile.exists()) {
                 Files.writeString(batFile.toPath(), batContent, StandardCharsets.UTF_8);
                 log.info("📝 Created startup script for Windows: start.cmd");
@@ -234,7 +271,6 @@ public class Main {
             if (!shFile.exists()) {
                 Files.writeString(shFile.toPath(), shContent, StandardCharsets.UTF_8);
 
-                // set executable (chmod +x) for the .sh file on Linux and MacOS
                 if (shFile.setExecutable(true, false)) {
                     log.info("📝 Created executable startup script for Linux/Mac: start.sh");
                 } else {
