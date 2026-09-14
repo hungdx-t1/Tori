@@ -23,6 +23,7 @@ The project follows a standard Maven multi-module architecture:
 ```text
 tori/
 ├── tori-api/       # The API layer. Exposes interfaces, records, and the ToriProvider.
+├── tori-base/      # Tori Base layer, contains base API for most normal projects.
 ├── tori-extension-dave/  # The Dave music extension.
 └── tori-server/    # The Core engine. Handles JDA, BotLoader, Scheduler, and Logging.
 ```
@@ -151,6 +152,10 @@ Compile your bot into a standard `.jar` file and drop it into the `bots/` folder
 Tori Server comes with an interactive console. Type these commands directly into the terminal:
 * `bots` - Displays a list of all currently active bots, their versions, and authors.
 * `stop` - Safely shuts down all JDA instances, saves data, and stops the server.
+* `help` - Show help for list of console commands.
+* `serverinfo` - Display server information.
+* `enablebot` / `disablebot` - Enable (or disable) bot manually.
+* `update` - Check for Tori server updates.
 
 ---
 

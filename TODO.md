@@ -11,7 +11,9 @@ Development plan and progress tracking of features for the next version.
 - [ ] Adding Autocomplete for `@CommandOption`
 - [ ] Optimize JVM startup parameters for hosting environment (ZGC / G1GC flags)
 - [ ] Make a global exception handler
+- [ ] Update README.md
 
 ### ✅ Completed
 - [x] Fix modern gui via Log4j2 `GuiLogAppender` is not working
 - [x] Implement `update` console command to `help` console command reply
+- [x] Add auto-update file config on `Json5GenericConfiguration`
