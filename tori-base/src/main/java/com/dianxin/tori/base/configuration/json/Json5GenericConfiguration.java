@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 /**
  * A generic configuration manager that supports reading, saving,
@@ -85,7 +88,15 @@ public class Json5GenericConfiguration<T extends AbstractJsonConfiguration> {
      */
     public void reloadConfig() {
         try {
-            this.botConfig = MAPPER.readValue(configFile, clazz);
+            // Automatically check and add missing fields from defaultResource
+            boolean updated = syncMissingKeysWithDefault();
+
+            // Directly map from file (or JSON tree) to POJO
+            this.botConfig = MAPPER.readValue(this.configFile, this.clazz);
+
+            if (updated) {
+                this.logger.info("🔄 Synced new configuration fields into '{}'", this.configFile.getName());
+            }
             logger.info("✅ JSON5 configuration successfully reloaded from '{}'", configFile.getAbsolutePath());
         } catch (JacksonException e) {
             // Catch syntax errors explicitly (Jackson prints the exact line and column where the error occurred)
@@ -105,6 +116,61 @@ public class Json5GenericConfiguration<T extends AbstractJsonConfiguration> {
         } catch (Exception e) {
             logger.error("❌ Error occurred while saving JSON5 configuration to '{}'", configFile.getAbsolutePath(), e);
         }
+    }
+
+    /**
+     * Match the user's config file with the default file in resources.
+     * Automatically add missing fields without losing the existing configuration.
+     */
+    private boolean syncMissingKeysWithDefault() {
+        try (InputStream in = this.clazz.getClassLoader().getResourceAsStream(this.defaultResource)) {
+            if (in == null) return false;
+
+            JsonNode defaultTree = MAPPER.readTree(in);
+            JsonNode userTree = MAPPER.readTree(this.configFile);
+
+            if (!(defaultTree instanceof ObjectNode defaultObj) || !(userTree instanceof ObjectNode userObj)) {
+                return false;
+            }
+
+            // Perform recursive merge
+            boolean modified = mergeMissingFields(defaultObj, userObj);
+
+            // If a new field is added, overwrite the file on disk
+            if (modified) {
+                MAPPER.writeValue(this.configFile, userObj);
+                return true;
+            }
+        } catch (Exception e) {
+            this.logger.warn("⚠️ Could not auto-sync missing config fields: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Iterate through each field of the default: if the user doesn't have it, add it.
+     * If it's nested objects, continue to traverse recursively.
+     */
+    private boolean mergeMissingFields(ObjectNode defaultNode, ObjectNode userNode) {
+        boolean modified = false;
+        for (Map.Entry<String, JsonNode> entry : defaultNode.properties()) {
+            String fieldName = entry.getKey();
+            JsonNode defaultValue = entry.getValue();
+
+            if (!userNode.has(fieldName)) {
+                // The user does not have this field -> Add default value
+                userNode.set(fieldName, defaultValue);
+                modified = true;
+                this.logger.info("➕ Added missing configuration field: '{}'", fieldName);
+            } else if (defaultValue.isObject() && userNode.get(fieldName).isObject()) {
+                // If both are objects (like warningDatabaseConfig), recurse into them
+                boolean childModified = mergeMissingFields((ObjectNode) defaultValue, (ObjectNode) userNode.get(fieldName));
+                if (childModified) {
+                    modified = true;
+                }
+            }
+        }
+        return modified;
     }
 
     public File getConfigFile() {
