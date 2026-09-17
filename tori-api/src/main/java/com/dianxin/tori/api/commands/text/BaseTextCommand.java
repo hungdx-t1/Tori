@@ -17,7 +17,12 @@ import java.util.List;
 
 /**
  * A statically configured base class for legacy text commands.
+ * @deprecated Discord is shifting toward Slash Commands to improve user privacy, security, and discoverability.
+ * So we need to deprecate any text command classes to align with Discord's requirements.
+ * It is recommended to use Slash command registrars for better experience.
  */
+@Deprecated
+@ApiStatus.ScheduledForRemoval(inVersion = "26.10.0")
 @ApiStatus.Obsolete(since = "Discord Message Content Intent restrictions")
 @SuppressWarnings("unused")
 public abstract class BaseTextCommand implements ITextCommand {
