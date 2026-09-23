@@ -4,6 +4,7 @@ import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
 import com.dianxin.tori.base.scheduler.Scheduler;
 import com.dianxin.tori.api.bot.IBotLoader;
 import com.dianxin.tori.api.config.ServerConfiguration;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * A global provider and registry for the {@link ToriServer} instance.
@@ -24,6 +25,7 @@ public final class ToriProvider {
      * @param instance The initialized {@link ToriServer} instance.
      * @throws UnsupportedOperationException if the server instance has already been set.
      */
+    @ApiStatus.Internal
     public static void setServer(ToriServer instance) {
         if (serverInstance != null) {
             throw new UnsupportedOperationException("ToriServer has already been set!");

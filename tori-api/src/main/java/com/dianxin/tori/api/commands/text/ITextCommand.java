@@ -6,9 +6,12 @@ import org.jetbrains.annotations.ApiStatus;
 
 /**
  * The core interface for legacy text-based commands (e.g., "!ping").
- * Note: Discord heavily restricts the Message Content Intent. It is highly recommended
- * to use Slash Commands instead.
+ * @deprecated Discord is shifting toward Slash Commands to improve user privacy, security, and discoverability.
+ * So we need to deprecate any text command classes to align with Discord's requirements.
+ * It is recommended to use Slash command registrars for better experience.
  */
+@Deprecated
+@ApiStatus.ScheduledForRemoval(inVersion = "26.10.0")
 @ApiStatus.Obsolete(since = "Discord Message Content Intent restrictions")
 public interface ITextCommand {
     /**
