@@ -31,56 +31,52 @@ jobs:
           cache: 'maven'
 
       # Build project and create javadoc jar
-      - name: Build with Maven
-        run: mvn clean package javadoc:jar -DskipTests
+      - name: Generate Aggregate Javadoc
+        run: mvn clean package javadoc:aggregate -DskipTests
 
       # Handling logical branching: Snapshot vs Release
       - name: Prepare Javadoc Site Structure
         run: |
           mkdir -p javadoc-site
           
-          # search file javadoc jar of tori-api
-          API_JAVADOC_JAR=$(find tori-api/target -name "*-javadoc.jar" | head -n 1)
+          # check aggregate javadoc folder has created on root pom
+          APIDOCS_DIR="target/site/apidocs"
           
-          if [ -z "$API_JAVADOC_JAR" ]; then
-            echo "❌ Cannot find javadoc jar in tori-api/target!"
+          if [ ! -d "$APIDOCS_DIR" ]; then
+            echo "❌ Cannot find aggregate apidocs directory at $APIDOCS_DIR!"
             exit 1
           fi
           
-          echo "Found javadoc artifact: $API_JAVADOC_JAR"
+          echo "Found aggregate Javadoc directory at: $APIDOCS_DIR
 
-          # Extract temporarily to a temp folder
-          mkdir -p tmp-docs
-          unzip -q "$API_JAVADOC_JAR" -d tmp-docs
-
-          # check event type activating workflow
+          # logic Release vs Push Dev/Snapshot
           if [ "${{ github.event_name }}" = "release" ]; then
             echo "📦 Processing Official Release deployment..."
           
-            # update stable version (release) (/Tori)
+            # stable latest (/Tori)
             mkdir -p javadoc-site/Tori
-            cp -r tmp-docs/* javadoc-site/Tori/
+            cp -r "$APIDOCS_DIR"/* javadoc-site/Tori/
           
-            # save as tag version (vd: /26.8.301)
+            # archive as version tag (ví dụ: /26.9.1)
             VERSION="${{ github.ref_name }}"
             mkdir -p "javadoc-site/$VERSION"
-            cp -r tmp-docs/* "javadoc-site/$VERSION/"
+            cp -r "$APIDOCS_DIR"/* "javadoc-site/$VERSION/"
           
           else
             echo "⚡ Processing Snapshot/Dev Push deployment..."
           
             # push to folder snapshot
             mkdir -p javadoc-site/snapshot
-            cp -r tmp-docs/* javadoc-site/snapshot/
+            cp -r "$APIDOCS_DIR"/* javadoc-site/snapshot/
           
-            # If there is no Tori folder (first deploy), create it temporarily to avoid 404
+            # ensure folder Tori always has data to prevent 404
             if [ ! -d "javadoc-site/Tori" ]; then
               mkdir -p javadoc-site/Tori
-              cp -r tmp-docs/* javadoc-site/Tori/
+              cp -r "$APIDOCS_DIR"/* javadoc-site/Tori/
             fi
           fi
 
-          # 3. create file index.html
+          # create file index.html auto redirect to /Tori/
           cat << 'EOF' > javadoc-site/index.html
           <!DOCTYPE html>
           <html>
