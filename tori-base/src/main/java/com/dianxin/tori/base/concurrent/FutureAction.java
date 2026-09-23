@@ -1,6 +1,7 @@
 package com.dianxin.tori.base.concurrent;
 
 import com.dianxin.tori.base.lifecycle.ExecutorManager;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -224,6 +225,7 @@ public interface FutureAction<T> {
      * @return The result of the action.
      * @throws RuntimeException if the action fails.
      */
+    @Blocking
     default T complete() {
         return complete(true);
     }
@@ -234,6 +236,7 @@ public interface FutureAction<T> {
      * @param shouldQueue Whether it should be queued internally.
      * @return The result of the action.
      */
+    @Blocking
     T complete(boolean shouldQueue);
 
     /**
@@ -244,6 +247,7 @@ public interface FutureAction<T> {
      * @return The result of the action.
      * @throws TimeoutException if the wait timed out.
      */
+    @Blocking
     T complete(long timeout, @NotNull TimeUnit unit) throws TimeoutException;
 
     /**
