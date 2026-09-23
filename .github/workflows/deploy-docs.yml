@@ -47,7 +47,7 @@ jobs:
             exit 1
           fi
           
-          echo "Found aggregate Javadoc directory at: $APIDOCS_DIR
+          echo "Found aggregate Javadoc directory at: $APIDOCS_DIR"
 
           # logic Release vs Push Dev/Snapshot
           if [ "${{ github.event_name }}" = "release" ]; then
