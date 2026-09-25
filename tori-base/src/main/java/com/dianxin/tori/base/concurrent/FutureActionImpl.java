@@ -130,7 +130,7 @@ class FutureActionImpl<T> implements FutureAction<T> {
                 return;
             }
 
-            // Gọi callback trước khi thử lại
+            // call callback before retry
             Consumer<Retry.RetryContext> listener = retry.getRetryListener();
             if (listener != null) {
                 try {
@@ -140,7 +140,7 @@ class FutureActionImpl<T> implements FutureAction<T> {
                 }
             }
 
-            // Thực thi trễ nếu có delay cấu hình
+            // delay execute if delay's profile has been set
             long delayMillis = retry.getDelay().toMillis();
             if (delayMillis > 0) {
                 CompletableFuture.delayedExecutor(delayMillis, TimeUnit.MILLISECONDS)
