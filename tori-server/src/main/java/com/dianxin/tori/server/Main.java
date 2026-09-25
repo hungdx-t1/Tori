@@ -7,10 +7,17 @@ import com.dianxin.tori.api.controller.VersionController;
 import com.dianxin.tori.server.gui.ToriServerGui;
 import com.dianxin.tori.server.logger.ConsoleMode;
 import com.dianxin.tori.server.updater.UpdateChecker;
+import net.minecrell.terminalconsole.TerminalConsoleAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.filter.Filterable;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +30,6 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Arrays;
 
-@SuppressWarnings("TrailingWhitespacesInTextBlock")
 public class Main {
     public static final Instant BOOT_TIME = Instant.now(); // save when press start
     private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -179,12 +185,49 @@ public class Main {
     private static void applyConsoleMode(String modeConfig) {
         ConsoleMode mode = ConsoleMode.fromString(modeConfig);
 
-        // assign to System Property and lets Log4j2 read
-        System.setProperty("tori.console.pattern", mode.getPattern());
-
-        // request Log4j2 to reload context if logger has initialized before
         LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        context.reconfigure();
+        Configuration config = context.getConfiguration();
+
+        String appenderName = "TerminalConsole";
+        Appender oldAppender = config.getAppender(appenderName);
+
+        if (oldAppender != null) {
+            // create PatternLayout
+            PatternLayout newLayout = PatternLayout.newBuilder()
+                    .setPattern(mode.getPattern())
+                    .setDisableAnsi(false)
+                    .setConfiguration(config)
+                    .build();
+
+            // get old filter if available
+            Filter filter = (oldAppender instanceof Filterable filterable) ? filterable.getFilter() : null;
+
+            // create TerminalConsoleAppender instance
+            Appender newAppender = TerminalConsoleAppender.createAppender(
+                    appenderName,
+                    filter,
+                    newLayout,
+                    oldAppender.ignoreExceptions()
+            );
+
+            // enable new and disable old appender
+            newAppender.start();
+            oldAppender.stop();
+
+            // register new appender to Configuration
+            config.addAppender(newAppender);
+
+            // update appender reference for Root Logger and another logger
+            for (LoggerConfig loggerConfig : config.getLoggers().values()) {
+                if (loggerConfig.getAppenders().containsKey(appenderName)) {
+                    loggerConfig.removeAppender(appenderName);
+                    loggerConfig.addAppender(newAppender, loggerConfig.getLevel(), null);
+                }
+            }
+
+            // update context
+            context.updateLoggers();
+        }
     }
 
     public static Server getServer() {
@@ -207,7 +250,8 @@ public class Main {
         }
     }
 
-    @SuppressWarnings("unused")
+    // removed - this is redundant and no longer suitable for some devices
+    @SuppressWarnings({"unused", "TrailingWhitespacesInTextBlock"})
     private static void generateStartupScripts() {
         String batContent = """
                 @echo off

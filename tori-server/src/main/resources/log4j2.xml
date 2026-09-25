@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" packages="com.dianxin.tori.server.logger">
+<Configuration status="WARN">
     <Appenders>
         <TerminalConsole name="TerminalConsole">
             <PatternLayout
-                    pattern="${sys:tori.console.pattern:-[%d{HH:mm:ss}] %highlight{%-5level} %magenta{[%t]} %cyan{[%logger{3}]} - %highlight{%msg}{FATAL=red bold, ERROR=red bold, WARN=yellow bold, INFO=normal, DEBUG=magenta bold}%n%style{%xEx}{red}}"
+                    pattern="[%d{HH:mm:ss}] %highlight{%-5level} %magenta{[%t]} %cyan{[%logger{3}]} - %highlight{%msg}{FATAL=red bold, ERROR=red bold, WARN=yellow bold, INFO=normal, DEBUG=magenta bold}%n%style{%xEx}{red}"
                     disableAnsi="false"/>
         </TerminalConsole>
 
