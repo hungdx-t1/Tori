@@ -6,10 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * The core implementation of the {@link FutureAction} interface.
@@ -19,11 +16,12 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings({"unused", "BooleanMethodIsAlwaysInverted"})
 class FutureActionImpl<T> implements FutureAction<T> {
-    private final CompletableFuture<T> future;
-
     private static final Logger logger = LoggerFactory.getLogger(FutureActionImpl.class);
-    private static Consumer<Object> DEFAULT_SUCCESS = o -> {
-    };
+
+    private final Supplier<CompletableFuture<T>> taskSupplier;
+    private final Executor executor;
+
+    private static Consumer<Object> DEFAULT_SUCCESS = o -> { };
     private static Consumer<? super Throwable> DEFAULT_FAILURE =
             t -> logger.error("FutureAction execution failed: [{}] {}", t.getClass().getSimpleName(), t.getMessage());
 
@@ -32,8 +30,13 @@ class FutureActionImpl<T> implements FutureAction<T> {
     private long deadline = 0;
     private BooleanSupplier checks;
 
-    public FutureActionImpl(CompletableFuture<T> future) {
-        this.future = future;
+    public FutureActionImpl(Supplier<CompletableFuture<T>> taskSupplier, Executor executor) {
+        this.taskSupplier = taskSupplier;
+        this.executor = executor;
+    }
+
+    public FutureActionImpl(CompletableFuture<T> fixedFuture) {
+        this(() -> fixedFuture, null);
     }
 
     public static void setDefaultFailure(Consumer<? super Throwable> callback) {
@@ -94,6 +97,60 @@ class FutureActionImpl<T> implements FutureAction<T> {
         return checks == null || checks.getAsBoolean();
     }
 
+    @NotNull
+    @Override
+    public FutureAction<T> retryWhen(@NotNull Retry retry) {
+        Supplier<CompletableFuture<T>> retryableSupplier = () -> {
+            CompletableFuture<T> promise = new CompletableFuture<>();
+            executeWithRetryPolicy(this.taskSupplier, retry, 1, promise);
+            return promise;
+        };
+
+        return new FutureActionImpl<>(retryableSupplier, this.executor);
+    }
+
+    private void executeWithRetryPolicy(
+            Supplier<CompletableFuture<T>> supplier,
+            Retry retry,
+            long currentAttempt,
+            CompletableFuture<T> targetFuture
+    ) {
+        supplier.get().whenComplete((result, ex) -> {
+            if (ex == null) {
+                targetFuture.complete(result);
+                return;
+            }
+
+            Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
+            boolean canRetry = currentAttempt <= retry.getMaxAttempts()
+                    && (retry.getFilter() == null || retry.getFilter().test(cause));
+
+            if (!canRetry) {
+                targetFuture.completeExceptionally(cause);
+                return;
+            }
+
+            // call callback before retry
+            Consumer<Retry.RetryContext> listener = retry.getRetryListener();
+            if (listener != null) {
+                try {
+                    listener.accept(new RetryImpl.DefaultRetryContext(currentAttempt, retry.getMaxAttempts(), cause));
+                } catch (Exception logEx) {
+                    logger.warn("Error inside retry listener: {}", logEx.getMessage());
+                }
+            }
+
+            // delay execute if delay's profile has been set
+            long delayMillis = retry.getDelay().toMillis();
+            if (delayMillis > 0) {
+                CompletableFuture.delayedExecutor(delayMillis, TimeUnit.MILLISECONDS)
+                        .execute(() -> executeWithRetryPolicy(supplier, retry, currentAttempt + 1, targetFuture));
+            } else {
+                executeWithRetryPolicy(supplier, retry, currentAttempt + 1, targetFuture);
+            }
+        });
+    }
+
     @Override
     public void queue(@Nullable Consumer<? super T> success, @Nullable Consumer<? super Throwable> failure) {
         if (!isExecutionValid()) return;
@@ -101,7 +158,7 @@ class FutureActionImpl<T> implements FutureAction<T> {
         Consumer<? super T> finalSuccess = (success == null) ? DEFAULT_SUCCESS : success;
         Consumer<? super Throwable> finalFailure = (failure == null) ? DEFAULT_FAILURE : failure;
 
-        future.whenComplete((result, error) -> {
+        submit(true).whenComplete((result, error) -> {
             if (error != null) {
                 finalFailure.accept(error instanceof CompletionException ? error.getCause() : error);
             } else {
@@ -118,7 +175,7 @@ class FutureActionImpl<T> implements FutureAction<T> {
             cancelled.cancel(false);
             return cancelled;
         }
-        return future.thenApply(Function.identity());
+        return taskSupplier.get();
     }
 
     @Override
@@ -142,54 +199,56 @@ class FutureActionImpl<T> implements FutureAction<T> {
     @Override
     @NotNull
     public FutureAction<T> recover(@NotNull Function<Throwable, T> fallback) {
-        return new FutureActionImpl<>(future.exceptionally(ex -> {
+        return new FutureActionImpl<>(() -> submit().exceptionally(ex -> {
             Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
             return fallback.apply(cause);
-        }));
+        }), this.executor);
     }
 
     @Override
     @NotNull
     public <U> FutureAction<U> map(@NotNull Function<? super T, ? extends U> mapper) {
-        return new FutureActionImpl<>(future.thenApply(mapper));
+        return new FutureActionImpl<>(() -> submit().thenApply(mapper), this.executor);
     }
 
     @Override
     @NotNull
     public <U> FutureAction<U> flatMap(@NotNull Function<? super T, ? extends FutureAction<U>> mapper) {
-        return new FutureActionImpl<>(future.thenCompose(result -> mapper.apply(result).submit()));
+        return new FutureActionImpl<>(() -> submit().thenCompose(res -> mapper.apply(res).submit()), this.executor);
     }
 
     @Override
     public FutureAction<T> onErrorMap(@Nullable Predicate<? super Throwable> condition, @NotNull Function<? super Throwable, ? extends T> map) {
-        return new FutureActionImpl<>(future.exceptionally(ex -> {
+        return new FutureActionImpl<>(() -> submit().exceptionally(ex -> {
             Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
             if (condition == null || condition.test(cause)) {
                 return map.apply(cause);
             }
             throw (cause instanceof RuntimeException) ? (RuntimeException) cause : new CompletionException(cause);
-        }));
+        }), this.executor);
     }
 
     @Override
     public FutureAction<T> onErrorFlatMap(@Nullable Predicate<? super Throwable> condition, @NotNull Function<? super Throwable, ? extends FutureAction<? extends T>> map) {
-        CompletableFuture<T> cf = new CompletableFuture<>();
-        future.whenComplete((res, ex) -> {
-            if (ex != null) {
-                Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
-                if (condition == null || condition.test(cause)) {
-                    map.apply(cause).submit().whenComplete((fbRes, fbEx) -> {
-                        if (fbEx != null) cf.completeExceptionally(fbEx);
-                        else cf.complete(fbRes);
-                    });
-                    return;
+        return new FutureActionImpl<>(() -> {
+            CompletableFuture<T> cf = new CompletableFuture<>();
+            submit().whenComplete((res, ex) -> {
+                if (ex != null) {
+                    Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
+                    if (condition == null || condition.test(cause)) {
+                        map.apply(cause).submit().whenComplete((fbRes, fbEx) -> {
+                            if (fbEx != null) cf.completeExceptionally(fbEx);
+                            else cf.complete(fbRes);
+                        });
+                        return;
+                    }
+                    cf.completeExceptionally(cause);
+                } else {
+                    cf.complete(res);
                 }
-                cf.completeExceptionally(cause);
-            } else {
-                cf.complete(res);
-            }
-        });
-        return new FutureActionImpl<>(cf);
+            });
+            return cf;
+        }, this.executor);
     }
 
     @Override
@@ -201,38 +260,35 @@ class FutureActionImpl<T> implements FutureAction<T> {
     @Override
     @NotNull
     public FutureAction<T> onSuccess(@NotNull Consumer<? super T> con) {
-        future.thenAccept(con);
-        return this;
+        return new FutureActionImpl<>(() -> submit().thenAccept(con).thenApply(v -> null), this.executor);
     }
 
     @Override
     @NotNull
     public FutureAction<T> onFailure(@NotNull Consumer<? super Throwable> failure) {
-        future.exceptionally(ex -> {
-            failure.accept(ex instanceof CompletionException ? ex.getCause() : ex);
-            return null;
-        });
-        return this;
+        return new FutureActionImpl<>(() -> submit().whenComplete((r, ex) -> {
+            if (ex != null) failure.accept(ex instanceof CompletionException ? ex.getCause() : ex);
+        }), this.executor);
     }
 
     @Override
     @NotNull
     public FutureAction<T> onExecutor(@NotNull Executor executor) {
-        return new FutureActionImpl<>(future.thenApplyAsync(Function.identity(), executor));
+        return new FutureActionImpl<>(() -> submit().thenApplyAsync(Function.identity(), executor), executor);
     }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return future.cancel(mayInterruptIfRunning);
+        return submit().cancel(mayInterruptIfRunning);
     }
 
     @Override
     public boolean isDone() {
-        return future.isDone();
+        return submit().isDone();
     }
 
     @Override
     public boolean isCancelled() {
-        return future.isCancelled();
+        return submit().isCancelled();
     }
 }

@@ -1,5 +1,6 @@
 package com.dianxin.tori.server.commands.console;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.AbstractConsoleCommand;
 
 /**
@@ -15,6 +16,7 @@ import com.dianxin.tori.base.console.commands.AbstractConsoleCommand;
  *     <li>{@code debug performance} - Displays performance metrics</li>
  * </ul>
  */
+@ReleasedSince("26.5.120")
 public class DebugConsoleCommand extends AbstractConsoleCommand {
     public DebugConsoleCommand() {
         super("debug");

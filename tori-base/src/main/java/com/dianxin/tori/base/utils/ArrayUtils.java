@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.utils;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +9,7 @@ import java.util.*;
 /**
  * Utility class providing helper methods for standard array conversions and element checks.
  */
+@ReleasedSince("26.8.301")
 @SuppressWarnings("unused")
 public final class ArrayUtils {
 

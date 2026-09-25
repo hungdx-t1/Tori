@@ -1,6 +1,7 @@
 package com.dianxin.tori.api.interaction;
 
 import com.dianxin.tori.api.bot.JavaDiscordBot;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.modals.Modal;
@@ -15,6 +16,7 @@ import java.util.Map;
  * A registry class responsible for managing and routing Discord Modal interactions.
  * It stores registered modal handlers and delegates incoming events to the appropriate handler based on the Modal ID.
  */
+@ReleasedSince("26.5.123")
 @SuppressWarnings("unused")
 public class ModalRegistrar {
     private static final Logger logger = LoggerFactory.getLogger(ModalRegistrar.class);

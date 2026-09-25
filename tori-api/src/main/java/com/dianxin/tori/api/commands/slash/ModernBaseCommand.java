@@ -3,6 +3,7 @@ package com.dianxin.tori.api.commands.slash;
 import com.dianxin.tori.api.annotations.commands.*;
 import com.dianxin.tori.api.bot.IBotMeta;
 import com.dianxin.tori.api.commands.CommandReplyConfig;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
  * Developers can use annotations like {@code @GuildOnly} or {@code @RequirePermissions}
  * on subclasses to dynamically enforce execution rules.
  */
+@ReleasedSince("26.4.231")
 @SuppressWarnings("unused")
 public abstract class ModernBaseCommand implements ISlashCommand {
     private final Logger logger;
@@ -115,6 +117,24 @@ public abstract class ModernBaseCommand implements ISlashCommand {
             event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
+        return true;
+    }
+
+    private boolean checkGuildOwnerOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
+        if (!getClass().isAnnotationPresent(GuildOwnerOnly.class)) return true;
+
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
+        String executorId = event.getUser().getId();
+        if (!guild.getOwnerId().equals(executorId)) {
+            event.reply(replyConfig.getGuildOwnerOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
         return true;
     }
 

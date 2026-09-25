@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.utils;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -9,6 +10,7 @@ import java.util.*;
 /**
  * Utility class providing conversion helpers for collections with mutable and unmodifiable variants.
  */
+@ReleasedSince("26.8.301")
 @SuppressWarnings("unused")
 public final class CollectionUtils {
 

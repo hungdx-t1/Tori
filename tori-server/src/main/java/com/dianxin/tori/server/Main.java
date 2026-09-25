@@ -5,9 +5,19 @@ import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
 import com.dianxin.tori.server.gui.ToriServerGui;
+import com.dianxin.tori.server.logger.ConsoleMode;
 import com.dianxin.tori.server.updater.UpdateChecker;
+import net.minecrell.terminalconsole.TerminalConsoleAppender;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.filter.Filterable;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +30,6 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Arrays;
 
-@SuppressWarnings("TrailingWhitespacesInTextBlock")
 public class Main {
     public static final Instant BOOT_TIME = Instant.now(); // save when press start
     private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -67,6 +76,10 @@ public class Main {
         }
 
         ServerConfiguration config = ToriBootstrap.init();
+
+        // new: load console mode
+        log.info("Loading console mode via config, please wait...");
+        applyConsoleMode(config.getConfig().getString("console.console-mode", "MODERN"));
 
         // check whether debug config section is enabled
         if(config.isDebug()) {
@@ -157,7 +170,7 @@ public class Main {
         }, "Tori-Shutdown-Thread"));
 
         log.info("Generating startup scripts...");
-        generateStartupScripts();
+        // generateStartupScripts();
 
         log.info("Tori Server has been started in {} ms!", System.currentTimeMillis() - BOOT_TIME.toEpochMilli());
         log.info("Ready!");
@@ -167,6 +180,54 @@ public class Main {
                 success -> {},
                 error -> log.error("Error while checking for updates.", error)
         );
+    }
+
+    private static void applyConsoleMode(String modeConfig) {
+        ConsoleMode mode = ConsoleMode.fromString(modeConfig);
+
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        Configuration config = context.getConfiguration();
+
+        String appenderName = "TerminalConsole";
+        Appender oldAppender = config.getAppender(appenderName);
+
+        if (oldAppender != null) {
+            // create PatternLayout
+            PatternLayout newLayout = PatternLayout.newBuilder()
+                    .setPattern(mode.getPattern())
+                    .setDisableAnsi(false)
+                    .setConfiguration(config)
+                    .build();
+
+            // get old filter if available
+            Filter filter = (oldAppender instanceof Filterable filterable) ? filterable.getFilter() : null;
+
+            // create TerminalConsoleAppender instance
+            Appender newAppender = TerminalConsoleAppender.createAppender(
+                    appenderName,
+                    filter,
+                    newLayout,
+                    oldAppender.ignoreExceptions()
+            );
+
+            // enable new and disable old appender
+            newAppender.start();
+            oldAppender.stop();
+
+            // register new appender to Configuration
+            config.addAppender(newAppender);
+
+            // update appender reference for Root Logger and another logger
+            for (LoggerConfig loggerConfig : config.getLoggers().values()) {
+                if (loggerConfig.getAppenders().containsKey(appenderName)) {
+                    loggerConfig.removeAppender(appenderName);
+                    loggerConfig.addAppender(newAppender, loggerConfig.getLevel(), null);
+                }
+            }
+
+            // update context
+            context.updateLoggers();
+        }
     }
 
     public static Server getServer() {
@@ -189,6 +250,8 @@ public class Main {
         }
     }
 
+    // removed - this is redundant and no longer suitable for some devices
+    @SuppressWarnings({"unused", "TrailingWhitespacesInTextBlock"})
     private static void generateStartupScripts() {
         String batContent = """
                 @echo off

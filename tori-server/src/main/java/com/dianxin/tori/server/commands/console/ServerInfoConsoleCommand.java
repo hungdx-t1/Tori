@@ -1,9 +1,11 @@
 package com.dianxin.tori.server.commands.console;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.AbstractConsoleCommand;
 import com.dianxin.tori.api.base.Constants;
 import net.dv8tion.jda.api.JDAInfo;
 
+@ReleasedSince("26.4.231")
 @SuppressWarnings("StringBufferReplaceableByString")
 public class ServerInfoConsoleCommand extends AbstractConsoleCommand {
     public ServerInfoConsoleCommand() {

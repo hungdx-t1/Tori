@@ -14,6 +14,7 @@ import java.util.List;
 public class LegacyCommandBuilder {
     private boolean isDefer = false;
     private boolean guildOnly = false;
+    private boolean guildOwnerOnly = false;
     private boolean ownerOnly = false;
     private boolean privateChannelOnly = false;
     private boolean directMessageOnly = false;
@@ -40,6 +41,17 @@ public class LegacyCommandBuilder {
      */
     public LegacyCommandBuilder setGuildOnly(boolean guildOnly) {
         this.guildOnly = guildOnly;
+        return this;
+    }
+
+    /**
+     * Restricts the command to be executable only by Owner in guild that been executed.
+     *
+     * @param guildOwnerOnly {@code true} to restrict, {@code false} else (default).
+     * @return This builder instance for method chaining.
+     */
+    public LegacyCommandBuilder setGuildOwnerOnly(boolean guildOwnerOnly) {
+        this.guildOwnerOnly = guildOwnerOnly;
         return this;
     }
 
@@ -118,6 +130,11 @@ public class LegacyCommandBuilder {
      * @return {@code true} if the command is restricted to guilds.
      */
     public boolean isGuildOnly() { return guildOnly; }
+
+    /**
+     * @return {@code true} if the command is restricted to owner in the guild that command executed.
+     */
+    public boolean isGuildOwnerOnly() { return guildOwnerOnly; }
 
     /**
      * @return {@code true} if the command is restricted to the bot owner.

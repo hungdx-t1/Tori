@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.commands.slash.v2.annotations;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.lang.annotation.ElementType;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
  * <p>During interaction execution, the framework extracts the matching Discord option by {@link #name()}
  * and injects its mapped value directly into the annotated field via reflection before invoking the {@link Execute} method.</p>
  */
+@ReleasedSince("26.8.301")
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CommandOption {

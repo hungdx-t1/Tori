@@ -1,6 +1,7 @@
 package com.dianxin.tori.server.updater;
 
 import com.dianxin.tori.api.base.Constants;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.concurrent.FutureAction;
 import com.dianxin.tori.base.lifecycle.ExecutorManager;
 import net.dv8tion.jda.api.JDAInfo;
@@ -15,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+@ReleasedSince("26.8.301")
 @SuppressWarnings({"JavadocLinkAsPlainText", "LoggingSimilarMessage"})
 public class UpdateChecker {
     private static final Logger log = LoggerFactory.getLogger(UpdateChecker.class);
@@ -82,6 +84,7 @@ public class UpdateChecker {
     /**
      * Get latest release version tag of JDA from GitHub Releases.
      */
+    @ReleasedSince("26.9.1")
     public static FutureAction<String> checkLatestJdaVersionAsync() {
         return FutureAction.action(() -> fetchLatestTag(JDA_API_URL), ExecutorManager.io());
     }

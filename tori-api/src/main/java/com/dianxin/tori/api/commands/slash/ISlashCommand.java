@@ -1,11 +1,13 @@
 package com.dianxin.tori.api.commands.slash;
 
 import com.dianxin.tori.api.commands.CommandReplyConfig;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 /**
  * The foundational interface for all slash commands within the framework.
  */
+@ReleasedSince("26.4.231")
 public interface ISlashCommand {
 
     /**

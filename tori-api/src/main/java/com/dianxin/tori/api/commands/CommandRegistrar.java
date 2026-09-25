@@ -13,6 +13,7 @@ import com.dianxin.tori.api.commands.usercontext.BaseUserContextMenu;
 import com.dianxin.tori.api.commands.usercontext.IUserContextMenu;
 import com.dianxin.tori.api.commands.usercontext.ModernBaseUserContextMenu;
 import com.dianxin.tori.api.exceptions.MissingAnnotationException;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
@@ -39,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * annotations/metadata, committing them to the Discord API, and routing incoming
  * interaction events to their respective execution classes.
  */
+@ReleasedSince("26.4.231")
 @SuppressWarnings({"unused", "FieldCanBeLocal", "ExtractMethodRecommender", "LoggingSimilarMessage"})
 public class CommandRegistrar {
     private static final Logger logger = LoggerFactory.getLogger(CommandRegistrar.class);

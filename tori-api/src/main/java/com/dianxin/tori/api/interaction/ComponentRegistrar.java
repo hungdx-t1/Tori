@@ -1,6 +1,7 @@
 package com.dianxin.tori.api.interaction;
 
 import com.dianxin.tori.api.bot.JavaDiscordBot;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.selections.EntitySelectMenu;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
@@ -18,6 +19,7 @@ import java.util.Map;
  * A registry class responsible for managing and routing Discord UI Component interactions
  * such as Buttons, String Select Menus, and Entity Select Menus.
  */
+@ReleasedSince("26.5.123")
 @SuppressWarnings("unused")
 public class ComponentRegistrar {
     private static final Logger logger = LoggerFactory.getLogger(ComponentRegistrar.class);
