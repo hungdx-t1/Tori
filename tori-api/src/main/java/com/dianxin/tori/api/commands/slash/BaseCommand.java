@@ -28,6 +28,7 @@ public abstract class BaseCommand implements ISlashCommand {
     // Command config
     private final boolean isDefer; // default false
     private final boolean guildOnly; // default false
+    private final boolean guildOwnerOnly; // default false
     private final boolean ownerOnly; // default false
     private final boolean privateChannelOnly; // default false
     private final boolean directMessageOnly; // (DM = direct message), default false
@@ -42,6 +43,7 @@ public abstract class BaseCommand implements ISlashCommand {
      * @param meta                    The {@link IBotMeta} containing the bot's metadata.
      * @param isDefer                 Whether the reply should be automatically deferred.
      * @param guildOnly               Whether the command is restricted to guilds.
+     * @param guildOwnerOnly          Whether the command is restricted to owner of guild.
      * @param ownerOnly               Whether the command is restricted to the bot owner.
      * @param privateChannelOnly      Whether the command is restricted to private channels.
      * @param directMessageOnly       Whether the command is restricted to direct messages.
@@ -49,7 +51,8 @@ public abstract class BaseCommand implements ISlashCommand {
      * @param selfPermissionsRequired A list of permissions required by the bot.
      * @param isDebug                 Whether to log debug information when executed.
      */
-    public BaseCommand(JDA jda, IBotMeta meta, boolean isDefer, boolean guildOnly, boolean ownerOnly,
+    public BaseCommand(JDA jda, IBotMeta meta, boolean isDefer, boolean guildOnly, boolean guildOwnerOnly,
+                       boolean ownerOnly,
                        boolean privateChannelOnly, boolean directMessageOnly,
                        List<Permission> permissionsRequired,
                        List<Permission> selfPermissionsRequired,
@@ -60,6 +63,7 @@ public abstract class BaseCommand implements ISlashCommand {
 
         this.isDefer = isDefer;
         this.guildOnly = guildOnly;
+        this.guildOwnerOnly = guildOwnerOnly;
         this.ownerOnly = ownerOnly;
         this.privateChannelOnly = privateChannelOnly;
         this.directMessageOnly = directMessageOnly;
@@ -82,6 +86,7 @@ public abstract class BaseCommand implements ISlashCommand {
 
         this.isDefer = builder.isDefer();
         this.guildOnly = builder.isGuildOnly();
+        this.guildOwnerOnly = builder.isGuildOwnerOnly();
         this.ownerOnly = builder.isOwnerOnly();
         this.privateChannelOnly = builder.isPrivateChannelOnly();
         this.directMessageOnly = builder.isDirectMessageOnly();
@@ -116,6 +121,7 @@ public abstract class BaseCommand implements ISlashCommand {
         if (!checkDMOnly(event, replyConfig)) return;
         if (!checkPrivateChannelOnly(event, replyConfig)) return;
         if (!checkGuildOnly(event, replyConfig)) return;
+        if (!checkGuildOwnerOnly(event, replyConfig)) return;
         if (!checkUserPermissions(event, replyConfig)) return;
         if (!checkBotPermissions(event, replyConfig)) return;
 
@@ -172,6 +178,24 @@ public abstract class BaseCommand implements ISlashCommand {
             event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
             return false;
         }
+        return true;
+    }
+
+    private boolean checkGuildOwnerOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
+        if (!this.guildOwnerOnly) return true;
+
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
+        String executorId = event.getUser().getId();
+        if (!guild.getOwnerId().equals(executorId)) {
+            event.reply(replyConfig.getGuildOwnerOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
         return true;
     }
 

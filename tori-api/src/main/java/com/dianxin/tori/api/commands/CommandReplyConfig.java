@@ -33,6 +33,11 @@ public interface CommandReplyConfig {
     String getGuildOnlyMessage();
 
     /**
+     * @return The message sent when a Guild-owner-only command is used in another cases.
+     */
+    String getGuildOwnerOnlyMessage();
+
+    /**
      * @param permission The specific permission the user is missing.
      * @return The message sent when the user lacks the required permission.
      */

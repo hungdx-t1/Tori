@@ -23,6 +23,11 @@ public class DefaultEnglishReplyConfig implements CommandReplyConfig {
     public String getGuildOnlyMessage() { return "❌ This command can only be used inside a Server (Guild)."; }
 
     @Override
+    public String getGuildOwnerOnlyMessage() {
+        return "❌ This command can only be used by owner of the guild.";
+    }
+
+    @Override
     public String getMissingUserPermissionMessage(Permission permission) {
         return "❌ You lack the `" + permission.getName() + "` permission.";
     }

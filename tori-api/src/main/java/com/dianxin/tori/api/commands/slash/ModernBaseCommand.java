@@ -118,6 +118,24 @@ public abstract class ModernBaseCommand implements ISlashCommand {
         return true;
     }
 
+    private boolean checkGuildOwnerOnly(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
+        if (!getClass().isAnnotationPresent(GuildOwnerOnly.class)) return true;
+
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            event.reply(replyConfig.getGuildOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
+        String executorId = event.getUser().getId();
+        if (!guild.getOwnerId().equals(executorId)) {
+            event.reply(replyConfig.getGuildOwnerOnlyMessage()).setEphemeral(true).queue();
+            return false;
+        }
+
+        return true;
+    }
+
     private boolean checkUserPermissions(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         RequirePermissions ann = getClass().getAnnotation(RequirePermissions.class);
         if (ann == null) return true;
