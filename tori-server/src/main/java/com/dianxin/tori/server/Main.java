@@ -5,8 +5,11 @@ import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
 import com.dianxin.tori.server.gui.ToriServerGui;
+import com.dianxin.tori.server.logger.ConsoleMode;
 import com.dianxin.tori.server.updater.UpdateChecker;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +70,10 @@ public class Main {
         }
 
         ServerConfiguration config = ToriBootstrap.init();
+
+        // new: load console mode
+        log.info("Loading console mode via config, please wait...");
+        applyConsoleMode(config.getConfig().getString("console.console-mode", "MODERN"));
 
         // check whether debug config section is enabled
         if(config.isDebug()) {
@@ -167,6 +174,17 @@ public class Main {
                 success -> {},
                 error -> log.error("Error while checking for updates.", error)
         );
+    }
+
+    private static void applyConsoleMode(String modeConfig) {
+        ConsoleMode mode = ConsoleMode.fromString(modeConfig);
+
+        // assign to System Property and lets Log4j2 read
+        System.setProperty("tori.console.pattern", mode.getPattern());
+
+        // request Log4j2 to reload context if logger has initialized before
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        context.reconfigure();
     }
 
     public static Server getServer() {

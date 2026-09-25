@@ -14,6 +14,20 @@ console:
   #   and FATAL messages. Recommended for live production environments.
   debug: false
 
+  # mới - console mode có thể là CLASSIC, MODERN, SEMI-MODERN, FULL-MODERN
+  # classic - full chữ console màu trắng (hoặc màu mặc định trên console)
+  # định dạng hiển thị của classic: [time] INFO [logging message] (VD: "[00:00:00] INFO Server started")
+  #
+  # modern - chữ console có nhiều màu, hiển thị thêm package-class, thread name
+  # định dạng hiển thị của modern: [time] INFO [thread-name] [package-class] - [logging message]
+  # lưu ý: package-class chỉ hiện 2 package gần nhất và tên class. ví dụ mino.dx.curseletcraft.ajax.Main thì sẽ rút thành curseletcraft.ajax.Main
+  #
+  # semi-modern - giống modern, nhưng không hiển thị package-class
+  #
+  # full-modern - giống modern, nhưng thay vì package-class chỉ hiện 2 package gần nhất và tên class thì sẽ hiện đầy đủ
+  # lưu ý cho full-modern: console log sẽ khá dài nếu quá nhiều package lồng vào trong 1 class đích
+  console-mode: MODERN
+
   # Controls the stack trace sanitizer, which automatically filters out noisy and
   # redundant internal packages from error logs (e.g., 'java.util.concurrent',
   # 'java.lang.Thread', and framework-level executions).

@@ -3,7 +3,7 @@
     <Appenders>
         <TerminalConsole name="TerminalConsole">
             <PatternLayout
-                    pattern="[%d{HH:mm:ss}] %highlight{%-5level} %magenta{[%t]} %cyan{[%logger{3}]} - %highlight{%msg}{FATAL=red bold, ERROR=red bold, WARN=yellow bold, INFO=normal, DEBUG=magenta bold}%n%style{%xEx}{red}"
+                    pattern="${sys:tori.console.pattern:-[%d{HH:mm:ss}] %highlight{%-5level} %magenta{[%t]} %cyan{[%logger{3}]} - %highlight{%msg}{FATAL=red bold, ERROR=red bold, WARN=yellow bold, INFO=normal, DEBUG=magenta bold}%n%style{%xEx}{red}}"
                     disableAnsi="false"/>
         </TerminalConsole>
 
@@ -25,10 +25,5 @@
             <AppenderRef ref="File"/>
             <AppenderRef ref="GuiAppender"/>
         </Root>
-
-<!--        <Logger name="com.dianxin.core" level="debug" additivity="false">-->
-<!--            <AppenderRef ref="TerminalConsole"/>-->
-<!--            <AppenderRef ref="File"/>-->
-<!--        </Logger>-->
     </Loggers>
 </Configuration>
