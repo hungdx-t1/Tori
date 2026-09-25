@@ -133,6 +133,75 @@ public interface FutureAction<T> {
     }
 
     // ==========================================
+    // RETRY UTILITIES
+    // ==========================================
+
+    /**
+     * Automatically retry the task a specified number of times if an error occurs.
+     *
+     * @param actionSupplier The function provides a new FutureAction for each rerun.
+     * @param retries        Maximum number of retries (e.g., 3 means the first run + a maximum of 3 retries).
+     * @param <T>            Return data type.
+     * @return A new FutureAction implements retry logic.
+     */
+    @NotNull
+    @CheckReturnValue
+    static <T> FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> actionSupplier, int retries) {
+        return retryIfError(actionSupplier, retries, null);
+    }
+
+    /**
+     * Automatically retry the task if an error occurs that meets the specified conditions.
+     *
+     * @param actionSupplier The function provides a new FutureAction for each rerun.
+     * @param retries        Maximum number of retries.
+     * @param condition      The error condition requires a retry (pass null if you want to retry every error).
+     * @param <T>            Return data type.
+     * @return A new FutureAction implements retry logic.
+     */
+    @NotNull
+    @CheckReturnValue
+    static <T> FutureAction<T> retryIfError(
+            @NotNull Supplier<FutureAction<T>> actionSupplier,
+            int retries,
+            @Nullable Predicate<? super Throwable> condition
+    ) {
+        CompletableFuture<T> resultFuture = new CompletableFuture<>();
+        executeWithRetry(actionSupplier, retries, condition, resultFuture);
+        return new FutureActionImpl<>(resultFuture);
+    }
+
+    private static <T> void executeWithRetry(
+            Supplier<FutureAction<T>> supplier,
+            int remainingRetries,
+            Predicate<? super Throwable> condition,
+            CompletableFuture<T> target
+    ) {
+        try {
+            supplier.get().submit().whenComplete((res, ex) -> {
+                if (ex != null) {
+                    Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
+                    boolean shouldRetry = (condition == null || condition.test(cause)) && remainingRetries > 0;
+
+                    if (shouldRetry) {
+                        executeWithRetry(supplier, remainingRetries - 1, condition, target);
+                    } else {
+                        target.completeExceptionally(cause);
+                    }
+                } else {
+                    target.complete(res);
+                }
+            });
+        } catch (Exception e) {
+            if (remainingRetries > 0 && (condition == null || condition.test(e))) {
+                executeWithRetry(supplier, remainingRetries - 1, condition, target);
+            } else {
+                target.completeExceptionally(e);
+            }
+        }
+    }
+
+    // ==========================================
     // CHECKS & DEADLINES
     // ==========================================
 
@@ -188,6 +257,50 @@ public interface FutureAction<T> {
     @NotNull
     default FutureAction<T> timeout(long timeout, @NotNull TimeUnit unit) {
         return deadline(timeout <= 0 ? 0 : System.currentTimeMillis() + unit.toMillis(timeout));
+    }
+
+    /**
+     * Try this action again with a new action from the supplier if encounter an error.
+     *
+     * @param retrySupplier The supplier provides the action to restart.
+     * @param retries       Number of retries.
+     * @return new FutureAction supports retry.
+     */
+    @NotNull
+    @CheckReturnValue
+    default FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> retrySupplier, int retries) {
+        return retryIfError(retrySupplier, retries, null);
+    }
+
+    /**
+     * Try this action again with a new action from the supplier if encounter an error.
+     *
+     * @param retrySupplier The supplier provides the action to restart.
+     * @param retries       Number of retries.
+     * @param condition     Exception conditions for triggering a retry.
+     * @return new FutureAction supports retry.
+     */
+    @NotNull
+    @CheckReturnValue
+    default FutureAction<T> retryIfError(
+            @NotNull Supplier<FutureAction<T>> retrySupplier,
+            int retries,
+            @Nullable Predicate<? super Throwable> condition
+    ) {
+        CompletableFuture<T> target = new CompletableFuture<>();
+        this.submit().whenComplete((res, ex) -> {
+            if (ex != null) {
+                Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
+                if ((condition == null || condition.test(cause)) && retries > 0) {
+                    executeWithRetry(retrySupplier, retries - 1, condition, target);
+                    return;
+                }
+                target.completeExceptionally(cause);
+            } else {
+                target.complete(res);
+            }
+        });
+        return new FutureActionImpl<>(target);
     }
 
     // ==========================================
