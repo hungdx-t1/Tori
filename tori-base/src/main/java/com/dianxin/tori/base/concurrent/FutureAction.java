@@ -6,6 +6,7 @@ import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -20,12 +21,24 @@ import java.util.stream.Collectors;
  *
  * @param <T> The expected return type of this action.
  */
-@SuppressWarnings({"unused", "CommentedOutCode"})
+@SuppressWarnings({"unused"})
 public interface FutureAction<T> {
 
     // ==========================================
     // STATIC FACTORIES
     // ==========================================
+
+    /**
+     * Creates a new FutureAction from a given {@link Callable} task, but Executor is IO.
+     *
+     * @param task     The task to be executed.
+     * @param <T>      The return type of the task.
+     * @return A new FutureAction instance.
+     */
+    @CheckReturnValue
+    static <T> FutureAction<T> action(@NotNull Callable<T> task) {
+        return action(task, null);
+    }
 
     /**
      * Creates a new FutureAction from a given {@link Callable} task.
@@ -38,14 +51,14 @@ public interface FutureAction<T> {
     @CheckReturnValue
     static <T> FutureAction<T> action(@NotNull Callable<T> task, @Nullable Executor executor) {
         Executor exec = (executor != null) ? executor : ExecutorManager.io();
-        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {
+        Supplier<CompletableFuture<T>> supplier = () -> CompletableFuture.supplyAsync(() -> {
             try {
                 return task.call();
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
         }, exec);
-        return new FutureActionImpl<>(future);
+        return new FutureActionImpl<>(supplier, exec);
     }
 
     /**
@@ -138,42 +151,6 @@ public interface FutureAction<T> {
     // RETRY UTILITIES
     // ==========================================
 
-    // temporary comment because of code conflicting
-//    /**
-//     * Automatically retry the task a specified number of times if an error occurs.
-//     *
-//     * @param actionSupplier The function provides a new FutureAction for each rerun.
-//     * @param retries        Maximum number of retries (e.g., 3 means the first run + a maximum of 3 retries).
-//     * @param <T>            Return data type.
-//     * @return A new FutureAction implements retry logic.
-//     */
-//    @NotNull
-//    @CheckReturnValue
-//    static <T> FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> actionSupplier, int retries) {
-//        return retryIfError(actionSupplier, retries, null);
-//    }
-//
-//    /**
-//     * Automatically retry the task if an error occurs that meets the specified conditions.
-//     *
-//     * @param actionSupplier The function provides a new FutureAction for each rerun.
-//     * @param retries        Maximum number of retries.
-//     * @param condition      The error condition requires a retry (pass null if you want to retry every error).
-//     * @param <T>            Return data type.
-//     * @return A new FutureAction implements retry logic.
-//     */
-//    @NotNull
-//    @CheckReturnValue
-//    static <T> FutureAction<T> retryIfError(
-//            @NotNull Supplier<FutureAction<T>> actionSupplier,
-//            int retries,
-//            @Nullable Predicate<? super Throwable> condition
-//    ) {
-//        CompletableFuture<T> resultFuture = new CompletableFuture<>();
-//        executeWithRetry(actionSupplier, retries, condition, resultFuture);
-//        return new FutureActionImpl<>(resultFuture);
-//    }
-
     private static <T> void executeWithRetry(
             Supplier<FutureAction<T>> supplier,
             int remainingRetries,
@@ -262,49 +239,91 @@ public interface FutureAction<T> {
         return deadline(timeout <= 0 ? 0 : System.currentTimeMillis() + unit.toMillis(timeout));
     }
 
+    // ==========================================
+    // RETRY UTILITIES (Reactor-inspired)
+    // ==========================================
+
     /**
-     * Try this action again with a new action from the supplier if encounter an error.
+     * Retries this action immediately up to the specified maximum attempts if an error occurs.
      *
-     * @param retrySupplier The supplier provides the action to restart.
-     * @param retries       Number of retries.
-     * @return new FutureAction supports retry.
+     * @param retries The maximum number of retry attempts. Must be non-negative.
+     * @return A new {@link FutureAction} equipped with immediate retry capabilities.
      */
     @NotNull
     @CheckReturnValue
-    default FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> retrySupplier, int retries) {
-        return retryIfError(retrySupplier, retries, null);
+    default FutureAction<T> retryIfError(int retries) {
+        return retryWhen(Retry.max(retries));
     }
 
     /**
-     * Try this action again with a new action from the supplier if encounter an error.
+     * Retries this action with a fixed backoff delay between attempts if an error occurs.
      *
-     * @param retrySupplier The supplier provides the action to restart.
-     * @param retries       Number of retries.
-     * @param condition     Exception conditions for triggering a retry.
-     * @return new FutureAction supports retry.
+     * @param retries The maximum number of retry attempts. Must be non-negative.
+     * @param delay   The fixed backoff {@link Duration} to wait before each retry attempt.
+     * @return A new {@link FutureAction} equipped with delayed retry capabilities.
      */
     @NotNull
     @CheckReturnValue
+    default FutureAction<T> retryIfError(int retries, @NotNull Duration delay) {
+        return retryWhen(Retry.fixedDelay(retries, delay));
+    }
+
+    /**
+     * Retries this action with a fixed backoff delay and an execution hook invoked prior to each retry.
+     *
+     * @param retries The maximum number of retry attempts. Must be non-negative.
+     * @param delay   The fixed backoff {@link Duration} to wait before each retry attempt.
+     * @param onRetry A {@link Runnable} hook invoked before dispatching each retry attempt (e.g., for logging).
+     * @return A new {@link FutureAction} equipped with intercepted retry capabilities.
+     */
+    @NotNull
+    @CheckReturnValue
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    default FutureAction<T> retryIfError(int retries, @NotNull Duration delay, @Nullable Runnable onRetry) {
+        Retry spec = Retry.fixedDelay(retries, delay);
+        if (onRetry != null) {
+            spec.doBeforeRetry(ctx -> onRetry.run());
+        }
+        return retryWhen(spec);
+    }
+
+    /**
+     * Retries this action using a comprehensive set of shortcut configurations including backoff, lifecycle hook, and error filtering.
+     *
+     * @param retries   The maximum number of retry attempts. Must be non-negative.
+     * @param delay     The fixed backoff {@link Duration} to wait before each retry attempt.
+     * @param onRetry   A {@link Runnable} hook invoked before dispatching each retry attempt.
+     * @param condition A predicate to filter which exceptions qualify for a retry. If {@code null}, retries on any exception.
+     * @return A new {@link FutureAction} equipped with conditionally filtered retry capabilities.
+     */
+    @NotNull
+    @CheckReturnValue
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     default FutureAction<T> retryIfError(
-            @NotNull Supplier<FutureAction<T>> retrySupplier,
             int retries,
+            @NotNull Duration delay,
+            @Nullable Runnable onRetry,
             @Nullable Predicate<? super Throwable> condition
     ) {
-        CompletableFuture<T> target = new CompletableFuture<>();
-        this.submit().whenComplete((res, ex) -> {
-            if (ex != null) {
-                Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
-                if ((condition == null || condition.test(cause)) && retries > 0) {
-                    executeWithRetry(retrySupplier, retries - 1, condition, target);
-                    return;
-                }
-                target.completeExceptionally(cause);
-            } else {
-                target.complete(res);
-            }
-        });
-        return new FutureActionImpl<>(target);
+        Retry spec = Retry.fixedDelay(retries, delay);
+        if (onRetry != null) {
+            spec.doBeforeRetry(ctx -> onRetry.run());
+        }
+        if (condition != null) {
+            spec.filter(condition);
+        }
+        return retryWhen(spec);
     }
+
+    /**
+     * Retries this action based on a custom retry strategy defined by a {@link Retry} policy.
+     *
+     * @param retry The {@link Retry} strategy detailing attempt limits, backoff periods, listeners, and error filters.
+     * @return A new {@link FutureAction} configured with the specified retry policy.
+     */
+    @NotNull
+    @CheckReturnValue
+    FutureAction<T> retryWhen(@NotNull Retry retry);
 
     // ==========================================
     // EXECUTION
