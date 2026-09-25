@@ -18,3 +18,5 @@ Development plan and progress tracking of features for the next version.
 - [x] Add `Retry` interface.
 - [x] Add `console.console-mode` configuration section to customize logging.
 - [x] Remove auto generate startup scripts (because it is redundant, and I will add wiki pages instead).
+- [x] Bump slf4j-api `2.0.19` to `2.0.20`
+- [x] Bump jackson-databind `3.2.2` to `3.2.3`
