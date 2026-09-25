@@ -164,7 +164,7 @@ public class Main {
         }, "Tori-Shutdown-Thread"));
 
         log.info("Generating startup scripts...");
-        generateStartupScripts();
+        // generateStartupScripts();
 
         log.info("Tori Server has been started in {} ms!", System.currentTimeMillis() - BOOT_TIME.toEpochMilli());
         log.info("Ready!");
@@ -207,6 +207,7 @@ public class Main {
         }
     }
 
+    @SuppressWarnings("unused")
     private static void generateStartupScripts() {
         String batContent = """
                 @echo off
