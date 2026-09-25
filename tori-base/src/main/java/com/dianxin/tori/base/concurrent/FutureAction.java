@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @param <T> The expected return type of this action.
  */
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused", "CommentedOutCode"})
 public interface FutureAction<T> {
 
     // ==========================================
@@ -82,6 +82,7 @@ public interface FutureAction<T> {
      * @param <E>     The return type of the actions.
      * @return A single FutureAction containing a List of all results in order.
      */
+    @SafeVarargs
     @NotNull
     @CheckReturnValue
     static <E> FutureAction<List<E>> collect(@NotNull FutureAction<? extends E>... actions) {
@@ -114,6 +115,7 @@ public interface FutureAction<T> {
      * @param <E>     The return type of the actions.
      * @return A single FutureAction containing a List of all results.
      */
+    @SafeVarargs
     @NotNull
     @CheckReturnValue
     static <E> FutureAction<List<E>> collectParallel(@NotNull FutureAction<? extends E>... actions) {
@@ -136,40 +138,41 @@ public interface FutureAction<T> {
     // RETRY UTILITIES
     // ==========================================
 
-    /**
-     * Automatically retry the task a specified number of times if an error occurs.
-     *
-     * @param actionSupplier The function provides a new FutureAction for each rerun.
-     * @param retries        Maximum number of retries (e.g., 3 means the first run + a maximum of 3 retries).
-     * @param <T>            Return data type.
-     * @return A new FutureAction implements retry logic.
-     */
-    @NotNull
-    @CheckReturnValue
-    static <T> FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> actionSupplier, int retries) {
-        return retryIfError(actionSupplier, retries, null);
-    }
-
-    /**
-     * Automatically retry the task if an error occurs that meets the specified conditions.
-     *
-     * @param actionSupplier The function provides a new FutureAction for each rerun.
-     * @param retries        Maximum number of retries.
-     * @param condition      The error condition requires a retry (pass null if you want to retry every error).
-     * @param <T>            Return data type.
-     * @return A new FutureAction implements retry logic.
-     */
-    @NotNull
-    @CheckReturnValue
-    static <T> FutureAction<T> retryIfError(
-            @NotNull Supplier<FutureAction<T>> actionSupplier,
-            int retries,
-            @Nullable Predicate<? super Throwable> condition
-    ) {
-        CompletableFuture<T> resultFuture = new CompletableFuture<>();
-        executeWithRetry(actionSupplier, retries, condition, resultFuture);
-        return new FutureActionImpl<>(resultFuture);
-    }
+    // temporary comment because of code conflicting
+//    /**
+//     * Automatically retry the task a specified number of times if an error occurs.
+//     *
+//     * @param actionSupplier The function provides a new FutureAction for each rerun.
+//     * @param retries        Maximum number of retries (e.g., 3 means the first run + a maximum of 3 retries).
+//     * @param <T>            Return data type.
+//     * @return A new FutureAction implements retry logic.
+//     */
+//    @NotNull
+//    @CheckReturnValue
+//    static <T> FutureAction<T> retryIfError(@NotNull Supplier<FutureAction<T>> actionSupplier, int retries) {
+//        return retryIfError(actionSupplier, retries, null);
+//    }
+//
+//    /**
+//     * Automatically retry the task if an error occurs that meets the specified conditions.
+//     *
+//     * @param actionSupplier The function provides a new FutureAction for each rerun.
+//     * @param retries        Maximum number of retries.
+//     * @param condition      The error condition requires a retry (pass null if you want to retry every error).
+//     * @param <T>            Return data type.
+//     * @return A new FutureAction implements retry logic.
+//     */
+//    @NotNull
+//    @CheckReturnValue
+//    static <T> FutureAction<T> retryIfError(
+//            @NotNull Supplier<FutureAction<T>> actionSupplier,
+//            int retries,
+//            @Nullable Predicate<? super Throwable> condition
+//    ) {
+//        CompletableFuture<T> resultFuture = new CompletableFuture<>();
+//        executeWithRetry(actionSupplier, retries, condition, resultFuture);
+//        return new FutureActionImpl<>(resultFuture);
+//    }
 
     private static <T> void executeWithRetry(
             Supplier<FutureAction<T>> supplier,
@@ -457,6 +460,7 @@ public interface FutureAction<T> {
      */
     @NotNull
     @CheckReturnValue
+    @SuppressWarnings("unchecked")
     default FutureAction<List<T>> zip(@NotNull FutureAction<? extends T> first, @NotNull FutureAction<? extends T>... other) {
         List<FutureAction<? extends T>> list = new ArrayList<>();
         list.add(this);
