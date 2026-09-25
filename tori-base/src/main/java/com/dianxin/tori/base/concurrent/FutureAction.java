@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.concurrent;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.lifecycle.ExecutorManager;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.CheckReturnValue;
@@ -249,6 +250,7 @@ public interface FutureAction<T> {
      * @param retries The maximum number of retry attempts. Must be non-negative.
      * @return A new {@link FutureAction} equipped with immediate retry capabilities.
      */
+    @ReleasedSince("26.9.3")
     @NotNull
     @CheckReturnValue
     default FutureAction<T> retryIfError(int retries) {
@@ -262,6 +264,7 @@ public interface FutureAction<T> {
      * @param delay   The fixed backoff {@link Duration} to wait before each retry attempt.
      * @return A new {@link FutureAction} equipped with delayed retry capabilities.
      */
+    @ReleasedSince("26.9.3")
     @NotNull
     @CheckReturnValue
     default FutureAction<T> retryIfError(int retries, @NotNull Duration delay) {
@@ -276,6 +279,7 @@ public interface FutureAction<T> {
      * @param onRetry A {@link Runnable} hook invoked before dispatching each retry attempt (e.g., for logging).
      * @return A new {@link FutureAction} equipped with intercepted retry capabilities.
      */
+    @ReleasedSince("26.9.3")
     @NotNull
     @CheckReturnValue
     @SuppressWarnings("ResultOfMethodCallIgnored")

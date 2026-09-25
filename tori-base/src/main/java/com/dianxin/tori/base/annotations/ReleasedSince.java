@@ -10,7 +10,12 @@ import java.lang.annotation.Target;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 @ApiStatus.Internal
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({
+        ElementType.TYPE,
+        ElementType.METHOD,
+        ElementType.CONSTRUCTOR,
+        ElementType.FIELD
+})
 public @interface ReleasedSince {
     String value() default "N/A";
 }

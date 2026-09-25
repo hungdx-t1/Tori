@@ -1,7 +1,7 @@
 package com.dianxin.tori.base.concurrent;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.CheckReturnValue;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
 
@@ -15,8 +15,9 @@ import java.util.function.Predicate;
  * Inspired by reactive backoff models, instances of this interface define attempt limits,
  * delay intervals, conditional error filtering, and interception hooks for each retry attempt.
  */
+@ReleasedSince("26.9.3")
 @NullMarked
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface Retry {
 
     /**
