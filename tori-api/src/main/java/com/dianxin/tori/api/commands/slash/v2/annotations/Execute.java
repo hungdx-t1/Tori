@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.commands.slash.v2.annotations;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.Permission;
 
 import java.lang.annotation.ElementType;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
  * <p>The annotated method can either take zero parameters or accept a single
  * {@link net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent} argument.</p>
  */
+@ReleasedSince("26.8.301")
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Execute {

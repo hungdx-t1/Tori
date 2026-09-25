@@ -5,6 +5,7 @@ import com.dianxin.tori.api.commands.slash.v2.annotations.Command;
 import com.dianxin.tori.api.commands.slash.v2.example.ExampleCommand;
 import com.dianxin.tori.api.commands.slash.v2.example.WarnCommand;
 import com.dianxin.tori.api.exceptions.MissingAnnotationException;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -29,6 +30,7 @@ import java.util.*;
  * @see ExampleCommand
  * @see WarnCommand
  */
+@ReleasedSince("26.8.301")
 @SuppressWarnings("unused")
 public class CommandRegistrar extends ListenerAdapter {
     private static final Logger log = LoggerFactory.getLogger(CommandRegistrar.class);

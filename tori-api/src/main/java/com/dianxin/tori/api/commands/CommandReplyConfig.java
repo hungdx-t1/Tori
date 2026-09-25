@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.commands;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.Permission;
 import org.jspecify.annotations.NullMarked;
 
@@ -8,6 +9,7 @@ import org.jspecify.annotations.NullMarked;
  * Implementing this interface allows developers to support multiple languages (i18n)
  * or custom bot personas without modifying the core logic.
  */
+@ReleasedSince("26.4.224")
 @NullMarked
 @SuppressWarnings({"unused", "SameReturnValue"})
 public interface CommandReplyConfig {

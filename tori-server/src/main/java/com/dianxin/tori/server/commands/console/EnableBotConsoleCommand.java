@@ -1,5 +1,6 @@
 package com.dianxin.tori.server.commands.console;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.AbstractConsoleCommand;
 import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.bot.IBotLoader;
@@ -9,6 +10,7 @@ import com.dianxin.tori.api.bot.IBotLoader;
  * <p>
  * Usage: enablebot MyBot.jar
  */
+@ReleasedSince("26.4.224")
 public class EnableBotConsoleCommand extends AbstractConsoleCommand {
     public EnableBotConsoleCommand() {
         super("enablebot");

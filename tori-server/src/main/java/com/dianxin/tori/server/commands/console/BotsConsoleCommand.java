@@ -1,5 +1,6 @@
 package com.dianxin.tori.server.commands.console;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.AbstractConsoleCommand;
 import com.dianxin.tori.api.bot.IBotMeta;
 import com.dianxin.tori.api.bot.JavaDiscordBot;
@@ -7,6 +8,7 @@ import com.dianxin.tori.server.Main;
 
 import java.util.List;
 
+@ReleasedSince("26.4.224")
 public class BotsConsoleCommand extends AbstractConsoleCommand {
     public BotsConsoleCommand() {
         super("bots");

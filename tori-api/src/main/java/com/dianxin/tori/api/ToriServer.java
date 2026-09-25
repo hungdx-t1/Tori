@@ -1,5 +1,6 @@
 package com.dianxin.tori.api;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
 import com.dianxin.tori.base.scheduler.Scheduler;
 import com.dianxin.tori.api.bot.IBotLoader;
@@ -48,6 +49,7 @@ public interface ToriServer {
      *
      * @return The {@link IBotLoader} instance.
      */
+    @ReleasedSince("26.4.224")
     IBotLoader getBotLoader();
 
     /**
@@ -58,5 +60,6 @@ public interface ToriServer {
      *
      * @return {@code true} if JDave is loaded and available, {@code false} otherwise.
      */
+    @ReleasedSince("26.5.120")
     boolean hasJDave();
 }

@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.utils;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
@@ -7,6 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Utility class containing pre-compiled regex patterns for string validation checks.
  */
+@ReleasedSince("26.8.301")
 @SuppressWarnings("unused")
 public final class PatternUtils {
 

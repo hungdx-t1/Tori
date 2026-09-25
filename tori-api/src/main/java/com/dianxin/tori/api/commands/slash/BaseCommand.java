@@ -3,6 +3,7 @@ package com.dianxin.tori.api.commands.slash;
 import com.dianxin.tori.api.bot.IBotMeta;
 import com.dianxin.tori.api.commands.CommandReplyConfig;
 import com.dianxin.tori.api.commands.LegacyCommandBuilder;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,6 +20,7 @@ import java.util.List;
  * Completely removes the Annotation scanning (Reflection) process to ensure maximum
  * execution speed, helping to prevent Discord's 3-second "Bot is thinking" timeout error.
  */
+@ReleasedSince("26.4.231")
 @SuppressWarnings("unused")
 public abstract class BaseCommand implements ISlashCommand {
     private final Logger logger;

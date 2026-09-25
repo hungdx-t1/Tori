@@ -1,5 +1,7 @@
 package com.dianxin.tori.api.commands.slash.v2.annotations;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +14,7 @@ import java.lang.annotation.Target;
  * in the Tori framework. A command class can either directly define options and an {@link Execute}
  * handler, or contain nested static classes annotated with {@link Subcommand} or {@link SubcommandGroup}.</p>
  */
+@ReleasedSince("26.8.301")
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {

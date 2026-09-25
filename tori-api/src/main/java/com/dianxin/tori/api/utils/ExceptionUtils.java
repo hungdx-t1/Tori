@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.utils;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * from stack traces. This is particularly useful for keeping server logs clean
  * from deeply nested internal framework calls (e.g., Reactor, Netty, or Jsoup).
  */
+@ReleasedSince("26.5.161")
 @SuppressWarnings({"unused", "ThrowableNotThrown", "UnusedReturnValue"})
 public class ExceptionUtils {
     private static volatile ExceptionUtils instance; // use volatile to feel-safe on multithreading

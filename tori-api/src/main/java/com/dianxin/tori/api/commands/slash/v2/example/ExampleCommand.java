@@ -3,6 +3,7 @@ package com.dianxin.tori.api.commands.slash.v2.example;
 import com.dianxin.tori.api.commands.slash.v2.annotations.Command;
 import com.dianxin.tori.api.commands.slash.v2.annotations.CommandOption;
 import com.dianxin.tori.api.commands.slash.v2.annotations.Execute;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -12,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
  *
  * <p>Usage: {@code /hello [member] [message]}</p>
  */
+@ReleasedSince("26.8.301")
 @Command(name = "hello", description = "Send a greeting to yourself or another member.")
 @SuppressWarnings({"unused", "DefaultAnnotationParam"})
 public class ExampleCommand {

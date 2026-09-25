@@ -3,6 +3,7 @@ package com.dianxin.tori.api.commands.text;
 import com.dianxin.tori.api.annotations.commands.*;
 import com.dianxin.tori.api.bot.IBotMeta;
 import com.dianxin.tori.api.commands.CommandReplyConfig;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
  * So we need to deprecate any text command classes to align with Discord's requirements.
  * It is recommended to use Slash command registrars for better experience.
  */
+@ReleasedSince("26.4.234")
 @Deprecated
 @ApiStatus.ScheduledForRemoval(inVersion = "26.10.0")
 @SuppressWarnings("unused")

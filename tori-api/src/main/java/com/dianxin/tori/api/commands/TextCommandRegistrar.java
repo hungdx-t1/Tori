@@ -5,6 +5,7 @@ import com.dianxin.tori.api.commands.text.ITextCommand;
 import com.dianxin.tori.api.commands.text.ModernBaseTextCommand;
 import com.dianxin.tori.api.commands.text.BaseTextCommand;
 import com.dianxin.tori.api.exceptions.MissingAnnotationException;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,7 @@ import java.util.Map;
  * So we need to deprecate any text command classes to align with Discord's requirements.
  * It is recommended to use Slash command registrars for better experience.
  */
+@ReleasedSince("26.4.234")
 @Deprecated
 @ApiStatus.ScheduledForRemoval(inVersion = "26.10.0")
 @ApiStatus.Obsolete(since = "Discord Message Content Intent restrictions")

@@ -1,5 +1,6 @@
 package com.dianxin.tori.api.interaction;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.modals.Modal;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * Represents a handler for a specific Discord Modal interaction.
  * Implement this interface to define the behavior when a user submits a modal form.
  */
+@ReleasedSince("26.5.123")
 public interface IModalHandler {
 
     /**

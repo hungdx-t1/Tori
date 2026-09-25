@@ -1,5 +1,6 @@
 package com.dianxin.tori.server.gui;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.server.Main;
 import com.formdev.flatlaf.FlatDarkLaf;
 import org.jspecify.annotations.NonNull;
@@ -11,6 +12,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
+@ReleasedSince("26.8.301")
 public class ToriServerGui extends JFrame {
     private static ToriServerGui instance;
     private final JTextArea logArea;
