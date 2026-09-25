@@ -1,10 +1,10 @@
-# 📌 Tori Framework Roadmap - v26.9.0
+# 📌 Tori Framework Roadmap - v26.9.3
 
 Development plan and progress tracking of features for the next version.
 
 ---
 
-## 🎯 v26.9.0 Milestone
+## 🎯 v26.9.3 Milestone
 
 ### 🛠️ In Progress / Planned
 
@@ -12,8 +12,7 @@ Development plan and progress tracking of features for the next version.
 - [ ] Make a global exception handler
 
 ### ✅ Completed
-- [x] Fix modern gui via Log4j2 `GuiLogAppender` is not working
-- [x] Implement `update` console command to `help` console command reply
-- [x] Add auto-update file config on `Json5GenericConfiguration`
-- [x] Update README.md
-- [x] Optimize JVM startup parameters for hosting environment (ZGC / G1GC flags)
+- [x] Make `FutureAction` lazy-loading completely.
+- [x] Add `@GuildOwnerOnly` annotation and related field to indicates the command can only executed by owner of the guild. 
+- [x] Add `retryWhen`/`retryIfError` method on `FutureAction`.
+- [x] Add `Retry` interface.
