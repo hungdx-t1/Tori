@@ -21,7 +21,7 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <revision>26.9.3</revision>
+    <revision>26.10.0</revision>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -119,10 +119,12 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <doclint>none</doclint>
+          <overview>${maven.multiModuleProjectDirectory}/javadoc/overview.html</overview>
+
           <!-- except module tori-server -->
           <excludePackageNames>com.dianxin.tori.server:com.dianxin.tori.server.*</excludePackageNames>
-          <windowtitle>Tori API Documentation</windowtitle>
-          <doctitle>Tori Framework API Documentation</doctitle>
+          <windowtitle>Tori API v${revision} Documentation</windowtitle>
+          <doctitle>Tori Framework v${revision} API Documentation</doctitle>
           <links>
             <link>https://docs.jda.wiki/</link>
             <link>https://docs.oracle.com/en/java/javase/21/docs/api/</link>

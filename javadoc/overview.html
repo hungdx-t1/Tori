@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+Tori, the modular Discord bot development framework.
+<p>
+    The documentation is split into respective modules (<code>tori-api</code>, <code>tori-base</code>)
+    and packages for each subject matter. This documentation covers developer-facing interfaces,
+    asynchronous interaction pipelines, and concurrency tools.
+</p>
+
+<p>
+    For basic command registration, see the <b>commands</b> package.
+    For async execution, see the <b>concurrent</b> package (powered by <code>FutureAction</code>).
+</p>
+
+<b>Note on Concurrency & Threading:</b>
+<ul>
+    <li>Avoid invoking blocking calls (such as <code>.complete()</code>) on Discord Gateway event threads.</li>
+    <li>Use <code>FutureAction.retryWhen(...)</code> or reactive patterns for network-sensitive operations.</li>
+</ul>
+</body>
+</html>
