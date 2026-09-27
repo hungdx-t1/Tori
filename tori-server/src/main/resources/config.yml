@@ -14,19 +14,28 @@ console:
   #   and FATAL messages. Recommended for live production environments.
   debug: false
 
-  # mới - console mode có thể là CLASSIC, MODERN, SEMI-MODERN, FULL-MODERN
-  # classic - full chữ console màu trắng (hoặc màu mặc định trên console)
-  # định dạng hiển thị của classic: [time] INFO [logging message] (VD: "[00:00:00] INFO Server started")
+  # Configures the terminal output layout and color styling for the console logger.
+  # Available options: CLASSIC, MODERN, SEMI-MODERN, FULL-MODERN
   #
-  # modern - chữ console có nhiều màu, hiển thị thêm package-class, thread name
-  # định dạng hiển thị của modern: [time] INFO [thread-name] [package-class] - [logging message]
-  # lưu ý: package-class chỉ hiện 2 package gần nhất và tên class. ví dụ mino.dx.curseletcraft.ajax.Main thì sẽ rút thành curseletcraft.ajax.Main
+  # - CLASSIC: Minimalist plain-text output without ANSI colors.
+  #   Format: [time] LEVEL [message]
+  #   Example: [00:00:00] INFO Server started
   #
-  # semi-modern - giống modern, nhưng không hiển thị package-class
+  # - MODERN (Default): Rich ANSI colored layout featuring thread names and a shortened logger path.
+  #   Displays only the last two parent packages and the simple class name to keep logs compact.
+  #   Format: [time] LEVEL [thread-name] [package-class] - [message]
+  #   Example: [00:00:00] INFO [main] [curseletcraft.ajax.Main] - Server started
   #
-  # full-modern - giống modern, nhưng thay vì package-class chỉ hiện 2 package gần nhất và tên class thì sẽ hiện đầy đủ
-  # lưu ý cho full-modern: console log sẽ khá dài nếu quá nhiều package lồng vào trong 1 class đích
-  console-mode: MODERN
+  # - SEMI-MODERN: Same rich ANSI colors and thread info as MODERN, but completely hides
+  #   the package-class segment for a cleaner, high-level stream.
+  #   Format: [time] LEVEL [thread-name] - [message]
+  #   Example: [00:00:00] INFO [main] - Server started
+  #
+  # - FULL-MODERN: Similar to MODERN, but prints the fully-qualified class name (FQCN).
+  #   Note: Log lines may become significantly longer if classes reside in deep package hierarchies.
+  #   Format: [time] LEVEL [thread-name] [full-package-class] - [message]
+  #   Example: [00:00:00] INFO [main] [mino.dx.curseletcraft.ajax.Main] - Server started
+  console-mode: FULL-MODERN
 
   # Controls the stack trace sanitizer, which automatically filters out noisy and
   # redundant internal packages from error logs (e.g., 'java.util.concurrent',
