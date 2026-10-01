@@ -1,11 +1,14 @@
 package com.dianxin.tori.base.collections;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@ReleasedSince("26.10.0")
 final class ImmutableUniqueMap<K, V> implements UniqueMap<K, V> {
 
     @SuppressWarnings("rawtypes")
@@ -52,11 +55,13 @@ final class ImmutableUniqueMap<K, V> implements UniqueMap<K, V> {
         throw new UnsupportedOperationException("ImmutableUniqueMap cannot be modified");
     }
 
+    @NonNull
     @Override
     public V get(K key) {
         return keyToValue.get(key);
     }
 
+    @NonNull
     @Override
     public K getKeyByValue(V value) {
         return valueToKey.get(value);
@@ -88,7 +93,7 @@ final class ImmutableUniqueMap<K, V> implements UniqueMap<K, V> {
     }
 
     @Override
-    public @Unmodifiable Map<K, V> getAll() {
+    public @Unmodifiable @NonNull Map<K, V> getAll() {
         return keyToValue;
     }
 }

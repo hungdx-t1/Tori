@@ -1,7 +1,10 @@
 package com.dianxin.tori.base.collections;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A bidirectional implementation of the {@link UniqueMap} interface, backed by two {@link HashMap}s.
@@ -53,6 +56,9 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
 
     @Override
     public synchronized void putUnique(K key, V value) {
+        Objects.requireNonNull(key, "key must not be null");
+        Objects.requireNonNull(value, "value must not be null");
+
         if (keyToValue.containsKey(key))
             throw new IllegalArgumentException("Key has already defined: " + key);
 
@@ -105,7 +111,7 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
     }
 
     @Override
-    public Map<K, V> getAll() {
+    public @NonNull Map<K, V> getAll() {
         return Map.copyOf(keyToValue);
     }
 }

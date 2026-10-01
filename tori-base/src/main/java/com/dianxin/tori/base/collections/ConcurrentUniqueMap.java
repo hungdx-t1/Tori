@@ -1,5 +1,6 @@
 package com.dianxin.tori.base.collections;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 
@@ -21,6 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
+@ReleasedSince("26.10.0")
 @SuppressWarnings("unused")
 public class ConcurrentUniqueMap<K, V> implements UniqueMap<K, V> {
 
@@ -62,6 +64,7 @@ public class ConcurrentUniqueMap<K, V> implements UniqueMap<K, V> {
         }
     }
 
+    @NonNull
     @Override
     public V get(K key) {
         readLock.lock();
@@ -72,6 +75,7 @@ public class ConcurrentUniqueMap<K, V> implements UniqueMap<K, V> {
         }
     }
 
+    @NonNull
     @Override
     public K getKeyByValue(V value) {
         readLock.lock();
@@ -138,8 +142,9 @@ public class ConcurrentUniqueMap<K, V> implements UniqueMap<K, V> {
         }
     }
 
+    @SuppressWarnings("Java9CollectionFactory")
     @Override
-    public @Unmodifiable Map<K, V> getAll() {
+    public @Unmodifiable @NonNull Map<K, V> getAll() {
         readLock.lock();
         try {
             // Snapshot copy on read lock for thread-safe

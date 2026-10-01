@@ -1,9 +1,9 @@
 package com.dianxin.tori.base.collections;
 
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -15,6 +15,7 @@ import java.util.Objects;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
+@NullMarked
 @SuppressWarnings("unused")
 public interface UniqueMap<K, V> {
 
@@ -103,6 +104,8 @@ public interface UniqueMap<K, V> {
      * @throws IllegalArgumentException if duplicate keys or duplicate values are provided
      */
     @SafeVarargs
+    @ReleasedSince("26.10.0")
+    @SuppressWarnings({"ConstantValue"})
     static <R1, R2> UniqueMap<R1, R2> of(Entry<R1, R2>... entries) {
         if (entries == null || entries.length == 0) {
             return ImmutableUniqueMap.empty();
@@ -116,7 +119,7 @@ public interface UniqueMap<K, V> {
      * @param <K> the type of the key
      * @param <V> the type of the value
      */
-    record Entry<K, V>(@NonNull K key, @NonNull V value) {
+    record Entry<K, V>(K key, V value) {
         public Entry {
             Objects.requireNonNull(key);
             Objects.requireNonNull(value);
