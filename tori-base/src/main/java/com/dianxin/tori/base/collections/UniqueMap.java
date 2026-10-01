@@ -1,8 +1,11 @@
 package com.dianxin.tori.base.collections;
 
 import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A map that enforces a one-to-one (bijective) mapping between keys and values.
@@ -88,4 +91,39 @@ public interface UniqueMap<K, V> {
      * @return an unmodifiable map containing all key-value pairs
      */
     @Unmodifiable Map<K, V> getAll();
+
+    /**
+     * Returns an unmodifiable {@link UniqueMap} containing the given key-value mappings.
+     *
+     * @param <R1>    the key type
+     * @param <R2>    the value type
+     * @param entries the key-value pairs to populate the map with
+     * @return an immutable {@link UniqueMap} containing the specified entries
+     * @throws NullPointerException     if the array or any entry/key/value is null
+     * @throws IllegalArgumentException if duplicate keys or duplicate values are provided
+     */
+    @SafeVarargs
+    static <R1, R2> UniqueMap<R1, R2> of(Entry<R1, R2>... entries) {
+        if (entries == null || entries.length == 0) {
+            return ImmutableUniqueMap.empty();
+        }
+        return ImmutableUniqueMap.from(entries);
+    }
+
+    /**
+     * A simple immutable record representing a key-value pair.
+     *
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     */
+    record Entry<K, V>(@NonNull K key, @NonNull V value) {
+        public Entry {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(value);
+        }
+
+        public static <K, V> Entry<K, V> of(K key, V value) {
+            return new Entry<>(key, value);
+        }
+    }
 }

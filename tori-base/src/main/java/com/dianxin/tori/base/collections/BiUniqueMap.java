@@ -41,12 +41,12 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
 
     /**
      * Constructs a {@code BiUniqueMap} initialized with a single key-value pair
-     * provided by the specified {@link SimpleKeyValue}.
+     * provided by the specified {@link Entry}.
      * If the input parameter is {@code null}, this constructor returns an empty map.
      *
      * @param simpleKeyValue the single key-value container used to populate this map, may be {@code null}
      */
-    public BiUniqueMap(SimpleKeyValue<K, V> simpleKeyValue) {
+    public BiUniqueMap(Entry<K, V> simpleKeyValue) {
         if (simpleKeyValue == null) return;
         putUnique(simpleKeyValue.key(), simpleKeyValue.value());
     }
@@ -108,12 +108,4 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
     public Map<K, V> getAll() {
         return Map.copyOf(keyToValue);
     }
-
-    /**
-     * A simple immutable record representing a key-value pair.
-     *
-     * @param <K> the type of the key
-     * @param <V> the type of the value
-     */
-    public record SimpleKeyValue<K, V>(K key, V value) {}
 }
