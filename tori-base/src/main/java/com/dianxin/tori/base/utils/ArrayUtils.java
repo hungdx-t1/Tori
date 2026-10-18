@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.IntFunction;
 
 /**
  * Utility class providing helper methods for standard array conversions and element checks.
@@ -44,6 +45,24 @@ public final class ArrayUtils {
     }
 
     /**
+     * Converts a {@link Collection} into an array using the provided generator function.
+     *
+     * @param <T>        the element type of the collection and the resulting array
+     * @param collection the source collection to be converted, can be {@code null}
+     * @param generator  the array constructor reference used to allocate the array of the correct type
+     *                   (e.g., {@code String[]::new})
+     * @return an array containing all the elements in the collection,
+     *         or an empty array of type {@code T} if the collection is {@code null} or empty
+     * @throws IllegalArgumentException if the {@code generator} is {@code null}
+     *         and the collection is not null or empty
+     */
+    @NotNull
+    public static <T> T[] toArray(@Nullable Collection<T> collection, @NotNull IntFunction<T[]> generator) {
+        if (collection == null || collection.isEmpty()) return generator.apply(0);
+        return collection.toArray(generator);
+    }
+
+    /**
      * Checks if a specific element exists within the provided array.
      *
      * @param <T>     the element type
@@ -58,5 +77,12 @@ public final class ArrayUtils {
             if (Objects.equals(item, element)) return true;
         }
         return false;
+    }
+
+    private static void testToArrayMethod() {
+        Collection<String> names = List.of("Anna", "Celsius", "Syren");
+
+        // String[]::new as same num -> new String[num]
+        String[] arr = ArrayUtils.toArray(names, String[]::new);
     }
 }
