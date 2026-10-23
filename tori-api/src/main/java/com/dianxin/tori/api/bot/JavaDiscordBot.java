@@ -1,8 +1,10 @@
 package com.dianxin.tori.api.bot;
 
 import com.dianxin.tori.api.ToriProvider;
+import com.dianxin.tori.base.annotations.ReleasedSince;
 import com.dianxin.tori.base.console.commands.ConsoleCommandManager;
 import com.dianxin.tori.api.controller.VersionController;
+import com.dianxin.tori.base.env.VirtualEnvironmentConfiguration;
 import com.dianxin.tori.base.scheduler.Scheduler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -13,7 +15,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +86,7 @@ public abstract class JavaDiscordBot {
     final void internalSetMeta(IBotMeta meta) {
         this.meta = meta;
 
-        // format plugins/bots/BotName
+        // format /bots/BotName
         this.dataFolder = new File("bots", meta.botName());
         if (!this.dataFolder.exists()) {
             this.dataFolder.mkdirs();
@@ -197,6 +200,12 @@ public abstract class JavaDiscordBot {
         }
     }
 
+    /**
+     * Gets the data storage directory specific to this bot.
+     *
+     * @return A {@link File} object representing the bot's data folder.
+     * @throws IllegalStateException If called before the bot metadata is fully initialized (e.g., inside the constructor).
+     */
     public File getDataFolder() {
         if (this.dataFolder == null) {
             // prevent dev call on constructor (when core is not load BotMeta completely)
@@ -239,40 +248,119 @@ public abstract class JavaDiscordBot {
     }
 
     /**
-     * The JDA instance representing the bot connection.
+     * Gets the JDA instance representing the active bot connection.
+     *
+     * @return The active {@link JDA} instance.
      */
     public JDA getJda() {
         return jda;
     }
 
+    /**
+     * Gets the self-user profile of the bot on Discord.
+     *
+     * @return The bot's {@link User} entity.
+     */
     public User getSelf() {
         return jda.getSelfUser();
     }
 
+    /**
+     * Generates a default bot invitation link with no pre-defined permissions.
+     *
+     * @return A string containing the bot invite URL.
+     */
     public String getBotInviteLink() {
         return jda.getInviteUrl();
     }
 
+    /**
+     * Generates a bot invitation link pre-configured with specific permissions.
+     *
+     * @param permissions An array of {@link Permission} flags to request upon invitation.
+     * @return A string containing the bot invite URL with permissions.
+     */
     public String getBotInviteLink(Permission... permissions) {
         return jda.getInviteUrl(permissions);
     }
 
     /**
-     * @return Meta of the bot
+     * Retrieves an environment configuration value by its variable name.
+     *
+     * @param variable The name of the environment variable.
+     * @return The string value of the environment variable, or {@code null} if not found.
      */
-    public @NotNull IBotMeta getMeta() {
+    @Nullable
+    @ReleasedSince("26.10.0")
+    public String getEnv(String variable) {
+        return VirtualEnvironmentConfiguration.get(variable);
+    }
+
+    /**
+     * Retrieves an environment configuration value by its variable name, throwing an exception if missing.
+     *
+     * @param variable The name of the environment variable.
+     * @return The string value of the environment variable.
+     * @throws RuntimeException If the variable is not defined.
+     */
+    @NonNull
+    @ReleasedSince("26.10.0")
+    public String getEnvOrThrow(String variable) {
+        return VirtualEnvironmentConfiguration.getOrThrow(variable);
+    }
+
+    /**
+     * Retrieves an environment configuration value, returning a fallback default if not found.
+     *
+     * @param variable     The name of the environment variable.
+     * @param defaultValue The fallback value to return if the variable is absent.
+     * @return The configuration value or the default value.
+     */
+    @NonNull
+    @ReleasedSince("26.10.0")
+    public String getEnvOrDefault(String variable, String defaultValue) {
+        return VirtualEnvironmentConfiguration.getOrDefault(variable, defaultValue);
+    }
+
+    /**
+     * Retrieves an environment configuration value, throwing a custom throwable if missing.
+     *
+     * @param variable   The name of the environment variable.
+     * @param throwable  The throwable to be thrown if the variable is absent.
+     * @return The string value of the environment variable.
+     * @throws Throwable If the variable is not found.
+     */
+    @NonNull
+    @ReleasedSince("26.10.0")
+    public String getEnvOrThrow(String variable, Throwable throwable) throws Throwable {
+        return VirtualEnvironmentConfiguration.getOrThrow(variable, throwable);
+    }
+
+    /**
+     * Gets the metadata container associated with this bot.
+     *
+     * @return The {@link IBotMeta} instance containing bot information.
+     */
+    public @NonNull IBotMeta getMeta() {
         return meta;
     }
 
     /**
-     * Logger instance for this bot class.
+     * Gets the logger instance dedicated to this bot class.
+     *
+     * @return The SLF4J {@link Logger} instance.
      */
-    @NotNull
+    @NonNull
     protected Logger getLogger() {
         return logger;
     }
 
-    @NotNull
+    /**
+     * Gets the global task scheduler provided by the Tori environment.
+     *
+     * @return The active {@link Scheduler} instance.
+     */
+    @NonNull
     public final Scheduler getScheduler() {
         return ToriProvider.getScheduler();
     }
