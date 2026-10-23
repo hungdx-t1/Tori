@@ -19,3 +19,4 @@ Development plan and progress tracking of features for the next version.
 - [x] Add toArray() to support rollback collections (ex: List, Set) to array
 - [x] Add auto-load ".env" file when starting Tori server.
 - [x] Add getEnv methods and bonus missing javadocs on some method in JavaDiscordBot.
+- [x] Bump jackson-databind 3.2.3 to 3.2.4
