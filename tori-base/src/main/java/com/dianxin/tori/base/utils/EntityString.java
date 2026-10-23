@@ -21,7 +21,7 @@ import java.util.StringJoiner;
  * <p>Output: {@code ClassName{id=123, name=Tori}}</p>
  */
 @SuppressWarnings("unused")
-public class EntityString {
+public final class EntityString {
     private final String entityName;
     private final StringJoiner joiner;
 

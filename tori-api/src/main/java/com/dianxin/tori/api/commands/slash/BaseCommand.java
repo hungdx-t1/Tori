@@ -118,6 +118,7 @@ public abstract class BaseCommand implements ISlashCommand {
      * @param event       The {@link SlashCommandInteractionEvent} triggered by Discord.
      * @param replyConfig The configuration used for custom error/rejection messages.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public final void handle(SlashCommandInteractionEvent event, CommandReplyConfig replyConfig) {
         if (!checkOwnerOnly(event, replyConfig)) return;
         if (!checkDMOnly(event, replyConfig)) return;
@@ -132,6 +133,12 @@ public abstract class BaseCommand implements ISlashCommand {
         try {
             execute(event);
         } catch (Exception e) {
+            if (isDefer) {
+                event.getHook().editOriginal("");
+            } else {
+                event.reply("");
+            }
+
             logger.error("❌ An error occured when trying to handle command `{}`!", event.getName(), e);
         }
 

@@ -4,6 +4,7 @@ import com.dianxin.tori.api.ToriProvider;
 import com.dianxin.tori.api.base.Constants;
 import com.dianxin.tori.api.config.ServerConfiguration;
 import com.dianxin.tori.api.controller.VersionController;
+import com.dianxin.tori.base.env.VirtualEnvironmentConfiguration;
 import com.dianxin.tori.server.gui.ToriServerGui;
 import com.dianxin.tori.server.logger.ConsoleMode;
 import com.dianxin.tori.server.updater.UpdateChecker;
@@ -66,6 +67,8 @@ public class Main {
         System.setProperty("terminal.ansi", "true");
 
         log.info("Starting Tori server, please wait...");
+
+        VirtualEnvironmentConfiguration.wakeup();
 
         try {
             VersionController.checkCompatibilityOrThrow();

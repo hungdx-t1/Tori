@@ -1,7 +1,10 @@
 package com.dianxin.tori.base.collections;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A bidirectional implementation of the {@link UniqueMap} interface, backed by two {@link HashMap}s.
@@ -41,18 +44,21 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
 
     /**
      * Constructs a {@code BiUniqueMap} initialized with a single key-value pair
-     * provided by the specified {@link SimpleKeyValue}.
+     * provided by the specified {@link Entry}.
      * If the input parameter is {@code null}, this constructor returns an empty map.
      *
      * @param simpleKeyValue the single key-value container used to populate this map, may be {@code null}
      */
-    public BiUniqueMap(SimpleKeyValue<K, V> simpleKeyValue) {
+    public BiUniqueMap(Entry<K, V> simpleKeyValue) {
         if (simpleKeyValue == null) return;
         putUnique(simpleKeyValue.key(), simpleKeyValue.value());
     }
 
     @Override
     public synchronized void putUnique(K key, V value) {
+        Objects.requireNonNull(key, "key must not be null");
+        Objects.requireNonNull(value, "value must not be null");
+
         if (keyToValue.containsKey(key))
             throw new IllegalArgumentException("Key has already defined: " + key);
 
@@ -105,15 +111,7 @@ public class BiUniqueMap<K, V> implements UniqueMap<K, V> {
     }
 
     @Override
-    public Map<K, V> getAll() {
+    public @NonNull Map<K, V> getAll() {
         return Map.copyOf(keyToValue);
     }
-
-    /**
-     * A simple immutable record representing a key-value pair.
-     *
-     * @param <K> the type of the key
-     * @param <V> the type of the value
-     */
-    public record SimpleKeyValue<K, V>(K key, V value) {}
 }
