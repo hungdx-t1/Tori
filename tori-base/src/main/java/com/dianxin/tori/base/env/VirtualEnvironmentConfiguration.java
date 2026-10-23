@@ -1,8 +1,8 @@
 package com.dianxin.tori.base.env;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class for environment configuration management.
@@ -30,6 +30,8 @@ public final class VirtualEnvironmentConfiguration {
     }
 
     private VirtualEnvironmentConfiguration() { }
+
+    public static void wakeup() { }
 
     /**
      * Retrieves the environment variable value linked with the specified key.
